@@ -23,7 +23,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.VolumeOff
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.FastRewind
 import androidx.compose.material.icons.filled.Home
@@ -198,9 +200,9 @@ private fun RockerFs(label: String, up: String, down: String) {
         Modifier.background(Color(0x1FFFFFFF), RoundedCornerShape(28.dp)).padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Btn(androidx.compose.material.icons.Icons.Default.Add, "$label up") { SamsungRemote.key(up) }
+        Btn(Icons.Default.Add, "$label up") { SamsungRemote.key(up) }
         Text(label, color = Color(0xCCFFFFFF), style = MaterialTheme.typography.labelMedium)
-        Btn(androidx.compose.material.icons.Icons.Default.Remove, "$label down") { SamsungRemote.key(down) }
+        Btn(Icons.Default.Remove, "$label down") { SamsungRemote.key(down) }
     }
 }
 
