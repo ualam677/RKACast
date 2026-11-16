@@ -104,7 +104,7 @@ object StremioClient {
             .build()
         http.newCall(req).execute().use { r ->
             val obj = json.parseToJsonElement(r.body?.string() ?: "{}").jsonObject
-            obj["error"]?.let { err ->
+            obj["error"]?.takeIf { it !is kotlinx.serialization.json.JsonNull }?.let { err ->
                 val msg = (err as? JsonObject)?.get("message")?.jsonPrimitive?.contentOrNull ?: err.toString()
                 throw IOException(msg)
             }

@@ -279,7 +279,7 @@ private fun DetailScreen(
                 Text(name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                 val info = listOfNotNull(m?.releaseInfo ?: route.preview?.releaseInfo, m?.runtime, (m?.imdbRating ?: route.preview?.imdbRating)?.let { "★ $it" })
                 if (info.isNotEmpty()) Text(info.joinToString(" · "), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                if (m?.genres?.isNotEmpty() == true) Text(m.genres.joinToString(", "), style = MaterialTheme.typography.bodySmall)
+                m?.genres?.takeIf { it.isNotEmpty() }?.let { Text(it.joinToString(", "), style = MaterialTheme.typography.bodySmall) }
                 Spacer(Modifier.height(8.dp))
                 (m?.description ?: route.preview?.description)?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
                 Spacer(Modifier.height(12.dp))
