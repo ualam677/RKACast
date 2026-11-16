@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.rkacast.browser.BrowserController
 import com.rkacast.cast.CastManager
 import com.rkacast.data.MediaUtils
 import com.rkacast.torrent.TorrentEngine
