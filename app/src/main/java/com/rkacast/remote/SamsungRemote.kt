@@ -1,6 +1,5 @@
 package com.rkacast.remote
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Base64
@@ -76,7 +75,6 @@ object SamsungRemote {
     private var mouseJob: Job? = null
 
     /** Self-signed certificate on port 8002 is expected, so this client (and only this one) trusts it. */
-    @SuppressLint("CustomX509TrustManager", "TrustAllX509TrustManager")
     private val client: OkHttpClient by lazy {
         val trustAll = object : X509TrustManager {
             override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {}
