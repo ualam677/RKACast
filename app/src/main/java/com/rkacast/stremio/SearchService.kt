@@ -1,10 +1,13 @@
 package com.rkacast.stremio
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonArray
@@ -18,33 +21,74 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 /**
- * Search across every addon catalog that supports search (in parallel), plus IMDb's suggestion API
- * which is fast and tolerant of typos and partial words. IMDb ids (tt…) are what Cinemeta and most
- * stream addons such as Torrentio use, so those results are directly playable.
+ * Fast search: IMDb's suggestion API answers in a few hundred ms and is typo-tolerant, so its results
+ * are shown first; every addon catalog that supports search is queried in parallel and merged in as
+ * each one answers. Slow addons are cut off after a few seconds, and results are cached.
  */
 object SearchService {
-    private val http = OkHttpClient.Builder().connectTimeout(8, TimeUnit.SECONDS).readTimeout(10, TimeUnit.SECONDS).build()
+    private const val ADDON_TIMEOUT_MS = 5000L
+    private val http = OkHttpClient.Builder().connectTimeout(4, TimeUnit.SECONDS).readTimeout(5, TimeUnit.SECONDS).build()
+    private val cache = object : LinkedHashMap<String, Results>(32, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Results>?) = size > 30
+    }
 
-    data class Results(val movies: List<MetaPreview>, val series: List<MetaPreview>, val other: List<MetaPreview>)
+    data class Results(
+        val movies: List<MetaPreview>,
+        val series: List<MetaPreview>,
+        val other: List<MetaPreview>,
+        val complete: Boolean,
+    ) {
+        val isEmpty get() = movies.isEmpty() && series.isEmpty() && other.isEmpty()
+    }
 
-    suspend fun search(addons: List<InstalledAddon>, rawQuery: String): Results = coroutineScope {
+    /** Emits progressively better results; the last emission has complete = true. */
+    fun search(addons: List<InstalledAddon>, rawQuery: String): Flow<Results> = channelFlow {
         val query = rawQuery.trim()
-        val catalogJobs = addons.flatMap { a -> a.manifest.catalogs.filter { it.supportsSearch }.map { a to it } }
-            .map { (a, c) -> async { runCatching { StremioClient.catalog(a, c, search = query) }.getOrDefault(emptyList()) } }
-        val imdbJob = async { runCatching { imdbSuggestions(query) }.getOrDefault(emptyList()) }
+        val key = query.lowercase(Locale.US) + "|" + addons.joinToString { it.transportUrl }
+        synchronized(cache) { cache[key] }?.let { send(it); return@channelFlow }
 
-        val addonResults = catalogJobs.awaitAll().flatten()
-        val imdb = imdbJob.await()
-
-        // Addon results carry better posters/metadata; IMDb fills gaps and fixes typos.
         val merged = LinkedHashMap<String, MetaPreview>()
-        (addonResults + imdb).forEach { m -> if (m.id !in merged) merged[m.id] = m }
-        val ranked = merged.values.sortedByDescending { score(query, it) }
+        val lock = Mutex()
+        var pending = 0
 
-        Results(
+        suspend fun add(items: List<MetaPreview>, preferNew: Boolean) {
+            val snapshot = lock.withLock {
+                items.forEach { m ->
+                    val existing = merged[m.id]
+                    // Addon metadata (better posters) replaces IMDb's when both have the same title.
+                    if (existing == null || (preferNew && m.poster != null)) merged[m.id] = m
+                }
+                pending--
+                build(query, merged.values.toList(), complete = pending == 0)
+            }
+            send(snapshot)
+            if (snapshot.complete) synchronized(cache) { cache[key] = snapshot }
+        }
+
+        val sources = addons.flatMap { a -> a.manifest.catalogs.filter { it.supportsSearch }.map { a to it } }
+        pending = sources.size + 1
+
+        launch {
+            val r = withTimeoutOrNull(ADDON_TIMEOUT_MS) { runCatching { imdbSuggestions(query) }.getOrNull() } ?: emptyList()
+            add(r, preferNew = false)
+        }
+        sources.forEach { (a, c) ->
+            launch(Dispatchers.IO) {
+                val r = withTimeoutOrNull(ADDON_TIMEOUT_MS) {
+                    runCatching { StremioClient.catalog(a, c, search = query) }.getOrNull()
+                } ?: emptyList()
+                add(r, preferNew = true)
+            }
+        }
+    }
+
+    private fun build(query: String, all: List<MetaPreview>, complete: Boolean): Results {
+        val ranked = all.sortedByDescending { score(query, it) }
+        return Results(
             movies = ranked.filter { it.type == "movie" },
             series = ranked.filter { it.type == "series" },
             other = ranked.filter { it.type != "movie" && it.type != "series" },
+            complete = complete,
         )
     }
 
@@ -81,7 +125,6 @@ object SearchService {
         .replace(Regex("\\p{M}"), "").lowercase(Locale.US).replace(Regex("[^a-z0-9 ]"), " ")
         .replace(Regex("\\s+"), " ").trim()
 
-    /** Simple relevance: exact > prefix > all words present > partial, with a small bonus for recency. */
     private fun score(query: String, m: MetaPreview): Double {
         val q = normalize(query)
         val n = normalize(m.name)

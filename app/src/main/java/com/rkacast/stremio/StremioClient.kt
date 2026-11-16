@@ -14,6 +14,11 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
+import kotlinx.coroutines.suspendCancellableCoroutine
+import okhttp3.Call
+import okhttp3.Callback
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -40,11 +45,25 @@ object StremioClient {
         return u
     }
 
-    private suspend fun get(url: String): String = withContext(Dispatchers.IO) {
-        http.newCall(Request.Builder().url(url).build()).execute().use { r ->
-            if (!r.isSuccessful) throw IOException("HTTP ${r.code} for $url")
-            r.body?.string() ?: throw IOException("Empty response")
-        }
+    /** Cancellable GET: if the coroutine is cancelled (e.g. a search timeout) the HTTP call is aborted too. */
+    private suspend fun get(url: String): String = suspendCancellableCoroutine { cont ->
+        val call = http.newCall(Request.Builder().url(url).build())
+        cont.invokeOnCancellation { call.cancel() }
+        call.enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                if (cont.isActive) cont.resumeWithException(e)
+            }
+
+            override fun onResponse(call: Call, response: okhttp3.Response) {
+                response.use { r ->
+                    val result = runCatching {
+                        if (!r.isSuccessful) throw IOException("HTTP ${r.code} for $url")
+                        r.body?.string() ?: throw IOException("Empty response")
+                    }
+                    if (cont.isActive) result.fold({ cont.resume(it) }, { cont.resumeWithException(it) })
+                }
+            }
+        })
     }
 
     private fun enc(s: String) = URLEncoder.encode(s, "UTF-8").replace("+", "%20")

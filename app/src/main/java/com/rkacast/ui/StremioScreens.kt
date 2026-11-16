@@ -242,13 +242,15 @@ private fun SearchScreen(addons: List<InstalledAddon>, initialQuery: String, pus
     var loading by remember { mutableStateOf(false) }
     var filter by rememberSaveable { mutableStateOf("all") }
 
-    // Search as you type, debounced.
+    // Search as you type (debounced); results stream in as each source answers.
     LaunchedEffect(query) {
-        if (query.trim().length < 2) { results = null; return@LaunchedEffect }
-        delay(350)
+        if (query.trim().length < 2) { results = null; loading = false; return@LaunchedEffect }
+        delay(250)
         loading = true
-        results = SearchService.search(addons, query)
-        loading = false
+        SearchService.search(addons, query).collect { r ->
+            if (!r.isEmpty || r.complete) results = r
+            loading = !r.complete
+        }
     }
 
     Column(Modifier.fillMaxSize()) {
@@ -274,7 +276,7 @@ private fun SearchScreen(addons: List<InstalledAddon>, initialQuery: String, pus
                 Modifier.padding(16.dp), color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             r == null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
-            r.movies.isEmpty() && r.series.isEmpty() && r.other.isEmpty() -> Text("No results for \"$query\"", Modifier.padding(16.dp))
+            r.isEmpty -> Text("No results for \"$query\"", Modifier.padding(16.dp))
             else -> {
                 val list = when (filter) {
                     "movie" -> r.movies

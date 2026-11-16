@@ -3,8 +3,6 @@ package com.rkacast.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,6 +30,7 @@ import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.FastRewind
+import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Input
 import androidx.compose.material.icons.filled.Keyboard
@@ -78,7 +77,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -242,51 +240,23 @@ private fun ControlSurface() {
 @Composable
 private fun TouchpadPanel() {
     var sensitivity by rememberSaveable { mutableStateOf(1.6f) }
+    var fullscreen by rememberSaveable { mutableStateOf(false) }
     val haptics = LocalHapticFeedback.current
+    if (fullscreen) FullscreenTouchpad(sensitivity) { fullscreen = false }
+    FilledTonalButton(onClick = { fullscreen = true }, modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
+        Icon(Icons.Default.Fullscreen, null); Spacer(Modifier.width(8.dp)); Text("Fullscreen touchpad")
+    }
     Surface(
         shape = RoundedCornerShape(20.dp),
         color = MaterialTheme.colorScheme.surfaceVariant,
         modifier = Modifier.fillMaxWidth().height(300.dp).border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(20.dp)),
     ) {
         Box(
-            Modifier.fillMaxSize().pointerInput(sensitivity) {
-                val slop = viewConfiguration.touchSlop
-                awaitEachGesture {
-                    awaitFirstDown()
-                    val start = System.currentTimeMillis()
-                    var travelled = 0f
-                    var maxPointers = 1
-                    var scrollAcc = 0f
-                    while (true) {
-                        val event = awaitPointerEvent()
-                        val pressed = event.changes.filter { it.pressed }
-                        if (pressed.isEmpty()) break
-                        maxPointers = maxOf(maxPointers, pressed.size)
-                        if (pressed.size >= 2) {
-                            // Two fingers: scroll the page (natural direction, like a laptop trackpad).
-                            val dy = pressed.map { it.positionChange().y }.average().toFloat()
-                            travelled += abs(dy)
-                            scrollAcc += dy
-                            while (scrollAcc > 45f) { SamsungRemote.key("KEY_UP"); scrollAcc -= 45f }
-                            while (scrollAcc < -45f) { SamsungRemote.key("KEY_DOWN"); scrollAcc += 45f }
-                        } else if (maxPointers == 1) {
-                            val d = pressed[0].positionChange()
-                            travelled += abs(d.x) + abs(d.y)
-                            if (travelled > slop) SamsungRemote.moveMouse(d.x * sensitivity, d.y * sensitivity)
-                        }
-                        event.changes.forEach { it.consume() }
-                    }
-                    val quick = System.currentTimeMillis() - start < 300
-                    if (quick && travelled <= slop * 2) {
-                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        if (maxPointers >= 2) SamsungRemote.rightClick() else SamsungRemote.leftClick()
-                    }
-                }
-            },
+            Modifier.fillMaxSize().tvTouchpad(sensitivity, haptics),
             contentAlignment = Alignment.Center,
         ) {
             Text(
-                "Drag to move the pointer · Tap to click\nTwo-finger drag to scroll · Two-finger tap for right-click",
+                "Drag to move the pointer · Tap to click\nTwo-finger drag to scroll · Two-finger tap for right-click\nHold, then drag, to drag things",
                 style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
             )
@@ -424,49 +394,18 @@ private fun RemoteKey(
 @Composable
 private fun KeyboardPanel() {
     val keyboardOpen by SamsungRemote.keyboardOpen.collectAsState()
-    var text by rememberSaveable { mutableStateOf("") }
-    var live by rememberSaveable { mutableStateOf(true) }
-
-    // Live mode mirrors every keystroke to the TV's text box.
-    LaunchedEffect(text, live) {
-        if (live && keyboardOpen) {
-            delay(120)
-            SamsungRemote.sendText(text)
-        }
-    }
-    LaunchedEffect(keyboardOpen) { if (!keyboardOpen) text = "" }
-
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.Keyboard, null, tint = if (keyboardOpen) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    if (keyboardOpen) "TV keyboard is open. Type here." else "Select a text box on the TV, then type here",
+                    if (keyboardOpen) "TV keyboard is open. Type here." else "Select a text box on the TV and your keyboard opens automatically",
                     style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f),
                 )
             }
             Spacer(Modifier.height(8.dp))
-            OutlinedTextField(
-                value = text, onValueChange = { text = it }, modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Type to send to TV") },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
-                keyboardActions = KeyboardActions(onGo = {
-                    SamsungRemote.sendText(text); SamsungRemote.submitText(); text = ""
-                }),
-                trailingIcon = {
-                    IconButton(onClick = { SamsungRemote.sendText(text); SamsungRemote.submitText(); text = "" }) {
-                        Icon(Icons.AutoMirrored.Filled.Send, "Send and press Enter")
-                    }
-                },
-            )
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Switch(live, { live = it })
-                Spacer(Modifier.width(8.dp))
-                Text("Live typing", style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
-                if (!live) TextButton(onClick = { SamsungRemote.sendText(text) }) { Text("Send text") }
-            }
+            TvTextInput(Modifier.fillMaxWidth())
         }
     }
 }
