@@ -13,7 +13,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-enum class Tab { HOME, BROWSER, STREMIO, SETTINGS }
+enum class Tab { HOME, BROWSER, STREMIO, REMOTE, SETTINGS }
 
 /** [source] is a remote URL or a content:// Uri string; it is converted to VTT by the local server. */
 data class SubtitlePick(val label: String, val source: String)

@@ -60,6 +60,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -76,8 +80,10 @@ import com.rkacast.stremio.CatalogDef
 import com.rkacast.stremio.InstalledAddon
 import com.rkacast.stremio.Meta
 import com.rkacast.stremio.MetaPreview
+import com.rkacast.stremio.SearchService
 import com.rkacast.stremio.StremioClient
 import com.rkacast.stremio.Subtitle
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 sealed interface StremioRoute {
@@ -166,7 +172,10 @@ private fun DiscoverScreen(addons: List<InstalledAddon>, push: (StremioRoute) ->
         item {
             Row(Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                 OutlinedTextField(
-                    value = query, onValueChange = { query = it },
+                    value = query, onValueChange = {
+                        query = it
+                        if (it.length >= 2) { push(StremioRoute.Search(it)); query = "" }
+                    },
                     modifier = Modifier.weight(1f), singleLine = true,
                     placeholder = { Text("Search movies & series") },
                     leadingIcon = { Icon(Icons.Default.Search, null) },
@@ -224,21 +233,81 @@ private fun Poster(m: MetaPreview, modifier: Modifier, onClick: () -> Unit) {
 // ------------------------------------------------------------------------------------------- Search
 
 @Composable
-private fun SearchScreen(addons: List<InstalledAddon>, query: String, push: (StremioRoute) -> Unit, pop: () -> Unit) {
-    var results by remember(query) { mutableStateOf<List<MetaPreview>?>(null) }
+private fun SearchScreen(addons: List<InstalledAddon>, initialQuery: String, push: (StremioRoute) -> Unit, pop: () -> Unit) {
+    var field by remember { mutableStateOf(TextFieldValue(initialQuery, TextRange(initialQuery.length))) }
+    val query = field.text
+    val focus = remember { FocusRequester() }
+    LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
+    var results by remember { mutableStateOf<SearchService.Results?>(null) }
+    var loading by remember { mutableStateOf(false) }
+    var filter by rememberSaveable { mutableStateOf("all") }
+
+    // Search as you type, debounced.
     LaunchedEffect(query) {
-        val searchable = addons.flatMap { a -> a.manifest.catalogs.filter { it.supportsSearch }.map { a to it } }
-        results = searchable.flatMap { (a, c) -> runCatching { StremioClient.catalog(a, c, search = query) }.getOrDefault(emptyList()) }
-            .distinctBy { it.id }
+        if (query.trim().length < 2) { results = null; return@LaunchedEffect }
+        delay(350)
+        loading = true
+        results = SearchService.search(addons, query)
+        loading = false
     }
+
     Column(Modifier.fillMaxSize()) {
-        BackHeader("\"$query\"", pop)
+        Row(Modifier.padding(horizontal = 4.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = pop) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back") }
+            OutlinedTextField(
+                value = field, onValueChange = { field = it }, singleLine = true, modifier = Modifier.weight(1f).focusRequester(focus),
+                placeholder = { Text("Search movies & series") },
+                leadingIcon = { Icon(Icons.Default.Search, null) },
+                trailingIcon = { if (loading) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp) },
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            )
+        }
+        Row(Modifier.padding(horizontal = 12.dp)) {
+            listOf("all" to "All", "movie" to "Movies", "series" to "Series").forEach { (k, label) ->
+                FilterChip(selected = filter == k, onClick = { filter = k }, label = { Text(label) }, modifier = Modifier.padding(end = 6.dp))
+            }
+        }
         val r = results
         when {
+            r == null && !loading -> Text(
+                "Type at least 2 letters. Typos are OK.",
+                Modifier.padding(16.dp), color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             r == null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
-            r.isEmpty() -> Text("No results", Modifier.padding(16.dp))
-            else -> LazyVerticalGrid(GridCells.Adaptive(110.dp), contentPadding = androidx.compose.foundation.layout.PaddingValues(8.dp)) {
-                items(r, key = { it.id }) { m -> Poster(m, Modifier.padding(4.dp)) { push(StremioRoute.Detail(m.type, m.id, m)) } }
+            r.movies.isEmpty() && r.series.isEmpty() && r.other.isEmpty() -> Text("No results for \"$query\"", Modifier.padding(16.dp))
+            else -> {
+                val list = when (filter) {
+                    "movie" -> r.movies
+                    "series" -> r.series
+                    else -> (r.movies + r.series + r.other)
+                }
+                if (filter == "all") {
+                    LazyColumn {
+                        if (r.movies.isNotEmpty()) item { ResultRow("Movies", r.movies, push) }
+                        if (r.series.isNotEmpty()) item { ResultRow("Series", r.series, push) }
+                        if (r.other.isNotEmpty()) item { ResultRow("Other", r.other, push) }
+                    }
+                } else {
+                    LazyVerticalGrid(GridCells.Adaptive(110.dp), contentPadding = androidx.compose.foundation.layout.PaddingValues(8.dp)) {
+                        items(list, key = { it.id }) { m -> Poster(m, Modifier.padding(4.dp)) { push(StremioRoute.Detail(m.type, m.id, m)) } }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ResultRow(title: String, items: List<MetaPreview>, push: (StremioRoute) -> Unit) {
+    Column(Modifier.padding(vertical = 6.dp)) {
+        Text(title, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 16.dp))
+        Spacer(Modifier.height(6.dp))
+        LazyRow(contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp)) {
+            items(items, key = { it.id }) { m ->
+                Column(Modifier.width(112.dp).padding(horizontal = 4.dp)) {
+                    Poster(m, Modifier.fillMaxWidth()) { push(StremioRoute.Detail(m.type, m.id, m)) }
+                    m.releaseInfo?.let { Text(it, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                }
             }
         }
     }

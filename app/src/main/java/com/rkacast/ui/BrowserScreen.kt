@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Cast
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -82,6 +83,14 @@ fun BrowserScreen(app: AppState, browser: BrowserController) {
                     keyboardActions = KeyboardActions(onGo = { browser.load(address.trim()) }),
                 )
                 IconButton(onClick = { browser.webView?.reload() }) { Icon(Icons.Default.Refresh, "Reload") }
+                IconButton(onClick = {
+                    if (com.rkacast.remote.SamsungRemote.status.value == com.rkacast.remote.SamsungRemote.Status.CONNECTED) {
+                        com.rkacast.remote.SamsungRemote.openInTvBrowser(browser.currentUrl)
+                        app.message("Opened on TV. Use the Remote tab to scroll and click.")
+                    } else {
+                        app.message("Connect to your Samsung TV in the Remote tab first")
+                    }
+                }) { Icon(Icons.Default.Tv, "Open this page on the TV") }
             }
             if (browser.progress < 100) LinearProgressIndicator(progress = { browser.progress / 100f }, modifier = Modifier.fillMaxWidth())
             AndroidView(

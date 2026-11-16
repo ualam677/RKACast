@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.SettingsRemote
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -67,6 +68,7 @@ fun MainScreen(app: AppState, browser: BrowserController) {
                     NavigationBarItem(app.tab == Tab.HOME, { app.tab = Tab.HOME }, { Icon(Icons.Default.Home, null) }, label = { Text("Cast") })
                     NavigationBarItem(app.tab == Tab.BROWSER, { app.tab = Tab.BROWSER }, { Icon(Icons.Default.Language, null) }, label = { Text("Browser") })
                     NavigationBarItem(app.tab == Tab.STREMIO, { app.tab = Tab.STREMIO }, { Icon(Icons.Default.Movie, null) }, label = { Text("Stremio") })
+                    NavigationBarItem(app.tab == Tab.REMOTE, { app.tab = Tab.REMOTE }, { Icon(Icons.Default.SettingsRemote, null) }, label = { Text("Remote") })
                     NavigationBarItem(app.tab == Tab.SETTINGS, { app.tab = Tab.SETTINGS }, { Icon(Icons.Default.Settings, null) }, label = { Text("Settings") })
                 }
             }
@@ -78,6 +80,7 @@ fun MainScreen(app: AppState, browser: BrowserController) {
                 Tab.HOME -> HomeScreen(app)
                 Tab.BROWSER -> BrowserScreen(app, browser)
                 Tab.STREMIO -> StremioTab(app)
+                Tab.REMOTE -> RemoteScreen(app)
                 Tab.SETTINGS -> SettingsScreen(app)
             }
         }

@@ -16,6 +16,7 @@ class RKACastApp : Application() {
         LocalMediaServer.init(this)
         TorrentEngine.init(this)
         CastManager.init(this)
+        com.rkacast.remote.SamsungRemote.init(this)
     }
 
     companion object {
