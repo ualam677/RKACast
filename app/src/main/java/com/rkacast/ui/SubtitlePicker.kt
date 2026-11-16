@@ -121,13 +121,13 @@ fun SubtitlePickerSheet(app: AppState) {
 
             Spacer(Modifier.height(12.dp))
             OutlinedButton(onClick = { pickFile.launch(arrayOf("*/*")) }, modifier = Modifier.fillMaxWidth()) {
-                Icon(Icons.Default.FolderOpen, null); Spacer(Modifier.width(8.dp)); Text("Pick .srt / .vtt file from phone")
+                Icon(Icons.Default.FolderOpen, null); Spacer(Modifier.width(8.dp)); Text("Pick .srt / .ass / .ssa / .vtt file from phone")
             }
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
                 value = urlInput, onValueChange = { urlInput = it },
                 modifier = Modifier.fillMaxWidth(), singleLine = true,
-                placeholder = { Text("Subtitle URL (.srt or .vtt)") },
+                placeholder = { Text("Subtitle URL (.srt, .ass, .ssa or .vtt)") },
             )
             Spacer(Modifier.height(8.dp))
             Button(

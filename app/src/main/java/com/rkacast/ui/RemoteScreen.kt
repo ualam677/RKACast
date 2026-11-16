@@ -277,6 +277,11 @@ private fun TouchpadPanel() {
 
 @Composable
 private fun ButtonsPanel() {
+    var fullscreen by rememberSaveable { mutableStateOf(false) }
+    if (fullscreen) FullscreenRemote { fullscreen = false }
+    FilledTonalButton(onClick = { fullscreen = true }, modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
+        Icon(Icons.Default.Fullscreen, null); Spacer(Modifier.width(8.dp)); Text("Fullscreen remote")
+    }
     Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             RemoteKey(Icons.Default.Input, "Source", "KEY_SOURCE")

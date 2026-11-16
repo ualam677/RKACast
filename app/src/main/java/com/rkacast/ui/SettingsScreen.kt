@@ -28,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.rkacast.data.MediaUtils
+import com.rkacast.data.PhonePlayer
 import com.rkacast.data.Settings
 import com.rkacast.data.TorrentMode
 import com.rkacast.server.StreamService
@@ -41,6 +42,8 @@ fun SettingsScreen(app: AppState) {
     val subScale by Settings.subtitleScale.collectAsState()
     val subLang by Settings.subtitleLang.collectAsState()
     val torrent by TorrentEngine.status.collectAsState()
+    val phonePlayer by Settings.phonePlayer.collectAsState()
+    val vlcInstalled = remember { com.rkacast.player.VlcLauncher.isInstalled(app.context) }
     var serverInput by remember(server) { mutableStateOf(server) }
     var langInput by remember(subLang) { mutableStateOf(subLang) }
 
@@ -87,6 +90,24 @@ fun SettingsScreen(app: AppState) {
             singleLine = true, modifier = Modifier.fillMaxWidth(),
         )
         Button(onClick = { Settings.setSubtitleLang(langInput) }, enabled = langInput.length == 3) { Text("Save language") }
+
+        Spacer(Modifier.height(16.dp)); HorizontalDivider(); Spacer(Modifier.height(16.dp))
+        Text("\"Play here\" player", style = MaterialTheme.typography.titleMedium)
+        Row(Modifier.fillMaxWidth().clickable { Settings.setPhonePlayer(PhonePlayer.BUILT_IN) }, verticalAlignment = Alignment.CenterVertically) {
+            RadioButton(phonePlayer == PhonePlayer.BUILT_IN, { Settings.setPhonePlayer(PhonePlayer.BUILT_IN) })
+            Text("Built-in player")
+        }
+        Row(Modifier.fillMaxWidth().clickable { Settings.setPhonePlayer(PhonePlayer.VLC) }, verticalAlignment = Alignment.CenterVertically) {
+            RadioButton(phonePlayer == PhonePlayer.VLC, { Settings.setPhonePlayer(PhonePlayer.VLC) })
+            Column {
+                Text("VLC" + if (!vlcInstalled) " (not installed)" else "")
+                Text(
+                    "Opens streams, torrents and subtitles in VLC. VLC's cast button can send them to Chromecast/Android TV. " +
+                        "VLC isn't available for Samsung TVs, so casting to your Samsung TV uses its built-in player.",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+        }
 
         Spacer(Modifier.height(16.dp)); HorizontalDivider(); Spacer(Modifier.height(16.dp))
         Text("Web videos", style = MaterialTheme.typography.titleMedium)

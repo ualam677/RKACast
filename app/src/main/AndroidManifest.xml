@@ -10,6 +10,11 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- Needed to detect/launch VLC on Android 11+ -->
+    <queries>
+        <package android:name="org.videolan.vlc" />
+    </queries>
+
     <application
         android:name=".RKACastApp"
         android:allowBackup="true"

@@ -8,7 +8,7 @@ Android app to cast videos to your TV, similar to Web Video Caster, with Stremio
 - **Local videos**: cast files from the phone (the gallery, Downloads, or "Share → RKACast").
 - **Stremio**: browse catalogs, search, view series episodes, and get streams from your addons (Cinemeta, Torrentio, etc.). Log in to import the addons from your Stremio account. `stremio://` links install addons.
 - **Torrents & magnet links**: stream on-device with a built-in libtorrent engine (sequential download, seeking), or use a Stremio streaming server on your network.
-- **Subtitles**: auto-fetch from Stremio subtitle addons (OpenSubtitles) in your preferred language, load any .srt/.vtt URL or file, and switch them mid-playback. SRT is converted to WebVTT automatically for Chromecast. Text size is adjustable.
+- **Subtitles** (SRT, SSA/ASS, VTT): auto-fetch from Stremio subtitle addons (OpenSubtitles) in your preferred language, load any .srt/.vtt URL or file, and switch them mid-playback. SRT is converted to WebVTT automatically for Chromecast. Text size is adjustable.
 - **Remote control**: play/pause, seek, ±10/30 s, stop, change subtitles.
 - **Play on phone**: built-in ExoPlayer.
 

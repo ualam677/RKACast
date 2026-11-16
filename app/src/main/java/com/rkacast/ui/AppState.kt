@@ -66,6 +66,12 @@ class AppState(val context: Context, val scope: CoroutineScope, val snackbar: Sn
             busy = label
             try {
                 val media = resolve() ?: throw IllegalStateException("This stream type can't be played")
+                if (com.rkacast.data.Settings.phonePlayer.value == com.rkacast.data.PhonePlayer.VLC) {
+                    if (!com.rkacast.player.VlcLauncher.play(context, media)) {
+                        snackbar.showSnackbar("VLC isn't installed. Opening the Play Store.")
+                    }
+                    return@launch
+                }
                 context.startActivity(
                     Intent(context, PlayerActivity::class.java)
                         .putExtra(PlayerActivity.EXTRA_URL, media.url)

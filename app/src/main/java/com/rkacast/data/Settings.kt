@@ -11,6 +11,8 @@ import kotlinx.serialization.json.Json
 
 enum class TorrentMode { BUILT_IN, STREMIO_SERVER }
 
+enum class PhonePlayer { BUILT_IN, VLC }
+
 @Serializable
 data class HistoryEntry(val url: String, val title: String, val time: Long)
 
@@ -51,6 +53,14 @@ object Settings {
         prefs.edit().putString("subtitleLang", v).apply()
     }
 
+    private val _phonePlayer = MutableStateFlow(PhonePlayer.BUILT_IN)
+    val phonePlayer: StateFlow<PhonePlayer> = _phonePlayer
+
+    fun setPhonePlayer(p: PhonePlayer) {
+        _phonePlayer.value = p
+        prefs.edit().putString("phonePlayer", p.name).apply()
+    }
+
     fun init(context: Context) {
         prefs = context.getSharedPreferences("rkacast", Context.MODE_PRIVATE)
         _torrentMode.value = runCatching {
@@ -60,6 +70,7 @@ object Settings {
         _proxyByDefault.value = prefs.getBoolean("proxyByDefault", false)
         _stremioAuthKey.value = prefs.getString("stremioAuthKey", null)
         _subtitleScale.value = prefs.getFloat("subtitleScale", 1.0f)
+        _phonePlayer.value = runCatching { PhonePlayer.valueOf(prefs.getString("phonePlayer", "BUILT_IN")!!) }.getOrDefault(PhonePlayer.BUILT_IN)
         _subtitleLang.value = prefs.getString("subtitleLang", "eng")!!
         _history.value = runCatching {
             json.decodeFromString<List<HistoryEntry>>(prefs.getString("history", "[]")!!)
