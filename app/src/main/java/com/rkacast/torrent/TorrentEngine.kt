@@ -2,6 +2,7 @@ package com.rkacast.torrent
 
 import android.content.Context
 import android.util.Log
+import com.rkacast.data.DebugLog
 import com.rkacast.data.MediaUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -197,6 +198,7 @@ object TorrentEngine {
             val hashFromMagnet = infoHashFromMagnet(magnet)
             _status.value = TorrentStatusInfo(hashFromMagnet ?: "", "Fetching metadata…", "", "metadata", 0f, 0, 0, 0, 0, 0)
 
+            DebugLog.i("Torrent", "Fetching metadata for $hashFromMagnet")
             val bytes = s.fetchMagnet(magnet, 90, baseDir)
                 ?: throw IOException("Could not get torrent metadata (no peers found)")
             val ti = TorrentInfo.bdecode(bytes)
@@ -214,6 +216,7 @@ object TorrentEngine {
                     .first()
             }
 
+            DebugLog.i("Torrent", "Metadata ok: ${files.numFiles()} files, chose #$chosen '${files.fileName(chosen)}' (${files.fileSize(chosen)} bytes), piece=${ti.pieceLength()}")
             sources["$hash/$chosen"]?.let { return@withContext it }
 
             val priorities = Array(files.numFiles()) { if (it == chosen) Priority.TOP_PRIORITY else Priority.IGNORE }

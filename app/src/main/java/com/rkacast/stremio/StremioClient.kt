@@ -48,14 +48,20 @@ object StremioClient {
     /** Cancellable GET: if the coroutine is cancelled (e.g. a search timeout) the HTTP call is aborted too. */
     private suspend fun get(url: String): String = suspendCancellableCoroutine { cont ->
         val call = http.newCall(Request.Builder().url(url).build())
+        val started = System.currentTimeMillis()
+        val label = com.rkacast.data.DebugLog.hostOnly(url) + " " + url.substringAfter("/manifest.json", "").ifBlank {
+            Regex("/(catalog|meta|stream|subtitles)/[^?]*").find(url)?.value ?: ""
+        }
         cont.invokeOnCancellation { call.cancel() }
         call.enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
+                if (!call.isCanceled()) com.rkacast.data.DebugLog.w("Stremio", "GET $label failed", e)
                 if (cont.isActive) cont.resumeWithException(e)
             }
 
             override fun onResponse(call: Call, response: okhttp3.Response) {
                 response.use { r ->
+                    com.rkacast.data.DebugLog.i("Stremio", "GET $label -> ${r.code} in ${System.currentTimeMillis() - started}ms")
                     val result = runCatching {
                         if (!r.isSuccessful) throw IOException("HTTP ${r.code} for $url")
                         r.body?.string() ?: throw IOException("Empty response")

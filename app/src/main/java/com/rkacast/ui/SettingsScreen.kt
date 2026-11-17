@@ -45,6 +45,7 @@ fun SettingsScreen(app: AppState) {
     val phonePlayer by Settings.phonePlayer.collectAsState()
     val vlcInstalled = remember { com.rkacast.player.VlcLauncher.isInstalled(app.context) }
     var serverInput by remember(server) { mutableStateOf(server) }
+    var showLog by remember { mutableStateOf(false) }
     var langInput by remember(subLang) { mutableStateOf(subLang) }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
@@ -120,9 +121,15 @@ fun SettingsScreen(app: AppState) {
         }
 
         Spacer(Modifier.height(16.dp)); HorizontalDivider(); Spacer(Modifier.height(16.dp))
+        Text("Troubleshooting", style = MaterialTheme.typography.titleMedium)
+        Text("If something doesn't work, open the debug log, copy it and paste it into the chat.", style = MaterialTheme.typography.bodySmall)
+        Button(onClick = { showLog = true }) { Text("Open debug log") }
+        if (showLog) DebugLogDialog(app) { showLog = false }
+
+        Spacer(Modifier.height(16.dp)); HorizontalDivider(); Spacer(Modifier.height(16.dp))
         Text("About", style = MaterialTheme.typography.titleMedium)
         Text(
-            "RKACast 0.1.0. Supports Chromecast / Google TV and DLNA TVs. Only stream content you have the rights to watch.",
+            "RKACast ${com.rkacast.BuildConfig.VERSION_NAME}. Supports Chromecast / Google TV and DLNA TVs. Only stream content you have the rights to watch.",
             style = MaterialTheme.typography.bodySmall,
         )
         Text("Phone address: ${MediaUtils.localIpAddress() ?: "not on Wi-Fi"}", style = MaterialTheme.typography.bodySmall)

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.Base64
 import android.util.Log
+import com.rkacast.data.DebugLog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -126,6 +127,7 @@ object SamsungRemote {
 
     private fun open(tv: SamsungTv, secure: Boolean) {
         val url = SamsungPayloads.connectUrl(tv.ip, APP_NAME, token(tv.ip), secure)
+        DebugLog.i("Samsung", "Connecting to ${tv.ip} secure=$secure hasToken=${token(tv.ip) != null}")
         socket = client.newWebSocket(Request.Builder().url(url).build(), Listener(tv, secure))
     }
 
@@ -148,7 +150,9 @@ object SamsungRemote {
 
         override fun onMessage(webSocket: WebSocket, text: String) {
             val obj = runCatching { json.parseToJsonElement(text).jsonObject }.getOrNull() ?: return
-            when (obj["event"]?.jsonPrimitive?.contentOrNull) {
+            val event = obj["event"]?.jsonPrimitive?.contentOrNull
+            DebugLog.i("Samsung", "Event $event" + if (event == "ed.installedApp.get") " raw=${text.take(1500)}" else "")
+            when (event) {
                 "ms.channel.connect" -> {
                     (obj["data"] as? JsonObject)?.get("token")?.jsonPrimitive?.contentOrNull?.let {
                         prefs.edit().putString("token_${tv.ip}", it).apply()
@@ -171,7 +175,7 @@ object SamsungRemote {
         }
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-            Log.w(TAG, "socket failure (secure=$secure)", t)
+            DebugLog.w("Samsung", "Socket failure secure=$secure http=${response?.code}", t)
             if (socket !== webSocket) return
             if (secure && !triedInsecureFallback && _status.value != Status.CONNECTED) {
                 // Older (2016-2017) models only expose the unencrypted port.

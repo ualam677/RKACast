@@ -20,6 +20,7 @@ import com.google.android.gms.cast.framework.CastSession
 import com.google.android.gms.cast.framework.SessionManagerListener
 import com.google.android.gms.cast.framework.media.RemoteMediaClient
 import com.google.android.gms.common.images.WebImage
+import com.rkacast.data.DebugLog
 import com.rkacast.cast.dlna.DlnaController
 import com.rkacast.cast.dlna.DlnaDevice
 import com.rkacast.cast.dlna.SsdpDiscovery
@@ -157,6 +158,7 @@ object CastManager {
 
     fun select(device: CastDevice) {
         if (_selected.value?.id == device.id) return
+        DebugLog.i("Cast", "Select ${device.kind} '${device.name}'")
         disconnect(stopMedia = false)
         when (device.kind) {
             DeviceKind.CHROMECAST -> {
@@ -202,6 +204,7 @@ object CastManager {
             pendingMedia = media
             return
         }
+        DebugLog.i("Cast", "Cast to ${sel.kind} '${sel.name}': ${DebugLog.mediaHint(media.url)} mime=${media.mimeType} subs=${media.subtitleUrl != null} start=${media.startPositionMs}")
         _state.value = PlayerState(media = media, isBuffering = true, status = "Loading on ${sel.name}…")
         when (sel.kind) {
             DeviceKind.CHROMECAST -> {
@@ -219,7 +222,10 @@ object CastManager {
                         }
                     }
                         .onSuccess { startDlnaPolling(c) }
-                        .onFailure { e -> _state.value = _state.value.copy(isBuffering = false, error = e.message) }
+                        .onFailure { e ->
+                            DebugLog.e("DLNA", "Load failed", e)
+                            _state.value = _state.value.copy(isBuffering = false, error = e.message)
+                        }
                 }
             }
         }
@@ -313,6 +319,7 @@ object CastManager {
             .apply { if (tracks != null) setActiveTrackIds(longArrayOf(1)) }
             .build()
         client.load(request).setResultCallback { result ->
+            DebugLog.i("Cast", "Load result: ${result.status.statusCode} ${result.status.statusMessage ?: ""}")
             if (!result.status.isSuccess) {
                 _state.value = _state.value.copy(
                     isBuffering = false,
@@ -337,10 +344,16 @@ object CastManager {
         cast(m.copy(subtitleUrl = subtitleUrl, startPositionMs = _state.value.positionMs))
     }
 
+    private var lastLoggedState = -1
+
     private val mediaCallback = object : RemoteMediaClient.Callback() {
         override fun onStatusUpdated() {
             val client = currentClient() ?: return
             val ps = client.playerState
+            if (ps != lastLoggedState) {
+                lastLoggedState = ps
+                DebugLog.i("Cast", "Player state=$ps idleReason=${client.idleReason}")
+            }
             _state.value = _state.value.copy(
                 isPlaying = ps == MediaStatus.PLAYER_STATE_PLAYING,
                 isBuffering = ps == MediaStatus.PLAYER_STATE_BUFFERING || ps == MediaStatus.PLAYER_STATE_LOADING,
@@ -393,11 +406,15 @@ object CastManager {
         override fun onSessionStarting(session: CastSession) {}
         override fun onSessionStarted(session: CastSession, sessionId: String) = attachSession(session)
         override fun onSessionStartFailed(session: CastSession, error: Int) {
+            DebugLog.w("Cast", "Session start failed: $error")
             _state.value = PlayerState(error = "Couldn't connect to the Cast device (error $error)")
             _selected.value = null
         }
         override fun onSessionEnding(session: CastSession) {}
-        override fun onSessionEnded(session: CastSession, error: Int) = detachSession(session)
+        override fun onSessionEnded(session: CastSession, error: Int) {
+            DebugLog.i("Cast", "Session ended ($error)")
+            detachSession(session)
+        }
         override fun onSessionResuming(session: CastSession, sessionId: String) {}
         override fun onSessionResumed(session: CastSession, wasSuspended: Boolean) = attachSession(session)
         override fun onSessionResumeFailed(session: CastSession, error: Int) = detachSession(session)

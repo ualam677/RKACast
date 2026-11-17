@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
 import android.util.Log
+import com.rkacast.data.DebugLog
 import com.rkacast.data.MediaUtils
 import com.rkacast.torrent.TorrentEngine
 import fi.iki.elonen.NanoHTTPD
@@ -58,6 +59,7 @@ object LocalMediaServer {
             Server(0).also { it.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false) }
         }
         server = s
+        DebugLog.i("Server", "Listening on ${MediaUtils.localIpAddress()}:${s.listeningPort}")
         return s.listeningPort
     }
 
@@ -138,6 +140,11 @@ object LocalMediaServer {
                 Log.e(TAG, "Error serving ${session.uri}", e)
                 newFixedLengthResponse(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, e.message ?: "error")
             }
+            DebugLog.i(
+                "Server",
+                "${session.method} ${session.uri.substringBeforeLast('/')}/… range=${session.headers["range"] ?: "-"} " +
+                    "from ${session.remoteIpAddress} -> ${resp.status?.requestStatus}",
+            )
             resp.addHeader("Access-Control-Allow-Origin", "*")
             resp.addHeader("Access-Control-Allow-Headers", "*")
             resp.addHeader("Access-Control-Expose-Headers", "Content-Length, Content-Range, Accept-Ranges")

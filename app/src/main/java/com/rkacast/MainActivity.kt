@@ -10,7 +10,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.core.content.IntentCompat
@@ -44,7 +46,14 @@ class MainActivity : ComponentActivity() {
                         incoming.value = null
                     }
                 }
+                var crash by remember { mutableStateOf(com.rkacast.data.DebugLog.pendingCrash()) }
                 MainScreen(app, browser)
+                crash?.let { report ->
+                    com.rkacast.ui.CrashReportDialog(app, report) {
+                        com.rkacast.data.DebugLog.clearCrash()
+                        crash = null
+                    }
+                }
             }
         }
     }
@@ -60,6 +69,13 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleIntent(app: AppState, intent: Intent) {
+        // Used by the CI screenshot job: am start ... --es tab REMOTE
+        if (BuildConfig.DEBUG) {
+            intent.getStringExtra("tab")?.let { t ->
+                runCatching { com.rkacast.ui.Tab.valueOf(t) }.getOrNull()?.let { app.tab = it }
+                return
+            }
+        }
         when (intent.action) {
             Intent.ACTION_SEND -> {
                 val stream = IntentCompat.getParcelableExtra(intent, Intent.EXTRA_STREAM, Uri::class.java)

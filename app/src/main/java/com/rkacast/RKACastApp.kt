@@ -11,6 +11,7 @@ class RKACastApp : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
+        com.rkacast.data.DebugLog.init(this)
         Settings.init(this)
         AddonRepository.init(this)
         LocalMediaServer.init(this)

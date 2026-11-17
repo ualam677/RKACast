@@ -52,6 +52,7 @@ class AppState(val context: Context, val scope: CoroutineScope, val snackbar: Sn
             } catch (e: kotlinx.coroutines.CancellationException) {
                 throw e
             } catch (e: Exception) {
+                com.rkacast.data.DebugLog.e("App", "Cast failed: $label", e)
                 snackbar.showSnackbar(e.message ?: "Something went wrong")
             } finally {
                 busy = null
