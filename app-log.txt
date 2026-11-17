@@ -1,0 +1,150 @@
+11-17 21:04:08.588  1690  2511 W chromium: [1117/210408.588581:WARNING:dns_config_service_android.cc(81)] Failed to read DnsConfig.
+11-17 21:04:10.338   518   549 I ActivityManager: Start proc 2714:com.android.chrome/u0a150 for service {com.android.chrome/org.chromium.chrome.browser.customtabs.CustomTabsConnectionService}
+11-17 21:04:10.608  2714  2714 I cr_SplitCompatApp: Launched version=113.0.5672.136 minSdkVersion=29 isBundle=true processName=com.android.chrome isIsolated=false
+11-17 21:04:10.777  2714  2769 I cr_LibraryLoader: Loading monochrome_64 from within /data/app/~~NRAsX_swTSPUA5eAKQGfxg==/com.android.chrome-LI8MegOh0IWMRLCYMNnBbw==/Chrome.apk
+11-17 21:04:10.778  2714  2769 I cr_Linker: loadLibraryImplLocked: monochrome_64, relroMode=1
+11-17 21:04:10.826  2714  2769 I cr_LibraryLoader: Successfully loaded native library
+11-17 21:04:10.829  2714  2769 I cr_CachingUmaRecorder: Flushed 21 samples from 21 histograms.
+11-17 21:04:11.354  2552  2552 I RKA/App : Started RKACast 0.2.19 (build 19) · Android 14 (SDK 34) · Google sdk_gphone64_x86_64
+11-17 21:04:13.834  1664  2248 I WebViewFactory: Loading com.google.android.webview version 113.0.5672.136 (code 567263637)
+11-17 21:04:14.002  1664  2248 D nativeloader: Configuring clns-8 for other apk /data/app/~~RacrRViy9-egVJD75x39bg==/com.google.android.trichromelibrary_567263637-bjPeBA06ScJHWvq2gcO65Q==/TrichromeLibrary.apk. target_sdk_version=34, uses_libraries=ALL, library_path=/data/app/~~k6aHJnC3eKxQRhv7CpABuA==/com.google.android.webview-g7lXGK1xNaiT6EzDJqKHyQ==/lib/x86_64:/data/app/~~k6aHJnC3eKxQRhv7CpABuA==/com.google.android.webview-g7lXGK1xNaiT6EzDJqKHyQ==/WebViewGoogle.apk!/lib/x86_64:/data/app/~~RacrRViy9-egVJD75x39bg==/com.google.android.trichromelibrary_567263637-bjPeBA06ScJHWvq2gcO65Q==/TrichromeLibrary.apk!/lib/x86_64, permitted_path=/data:/mnt/expand
+11-17 21:04:14.328  1664  2248 D nativeloader: Configuring clns-9 for other apk /data/app/~~k6aHJnC3eKxQRhv7CpABuA==/com.google.android.webview-g7lXGK1xNaiT6EzDJqKHyQ==/WebViewGoogle.apk. target_sdk_version=34, uses_libraries=, library_path=/data/app/~~k6aHJnC3eKxQRhv7CpABuA==/com.google.android.webview-g7lXGK1xNaiT6EzDJqKHyQ==/lib/x86_64:/data/app/~~k6aHJnC3eKxQRhv7CpABuA==/com.google.android.webview-g7lXGK1xNaiT6EzDJqKHyQ==/WebViewGoogle.apk!/lib/x86_64:/data/app/~~RacrRViy9-egVJD75x39bg==/com.google.android.trichromelibrary_567263637-bjPeBA06ScJHWvq2gcO65Q==/TrichromeLibrary.apk!/lib/x86_64, permitted_path=/data:/mnt/expand
+11-17 21:04:14.790  1664  2248 I cr_WVCFactoryProvider: Loaded version=113.0.5672.136 minSdkVersion=29 isBundle=false multiprocess=true packageId=2
+11-17 21:04:15.468  1664  2248 I cr_LibraryLoader: Successfully loaded native library
+11-17 21:04:15.479  1664  2248 I cr_CachingUmaRecorder: Flushed 8 samples from 8 histograms.
+11-17 21:04:15.514  1664  3218 I cr_VariationsUtils: Failed reading seed file "/data/user/0/com.google.android.googlequicksearchbox/app_webview/variations_seed_new"
+11-17 21:04:15.514  1664  3218 I cr_VariationsUtils: Failed reading seed file "/data/user/0/com.google.android.googlequicksearchbox/app_webview/variations_seed"
+11-17 21:04:15.517  1664  3218 I cr_VariationsUtils: Requesting new seed from IVariationsSeedServer
+11-17 21:04:15.881   518   549 I ActivityManager: Start proc 3248:com.google.android.webview:webview_service/u0a134 for service {com.google.android.webview/org.chromium.android_webview.services.VariationsSeedServer}
+11-17 21:04:16.071  3248  3248 D nativeloader: Configuring clns-6 for other apk /data/app/~~RacrRViy9-egVJD75x39bg==/com.google.android.trichromelibrary_567263637-bjPeBA06ScJHWvq2gcO65Q==/TrichromeLibrary.apk. target_sdk_version=34, uses_libraries=ALL, library_path=/data/app/~~k6aHJnC3eKxQRhv7CpABuA==/com.google.android.webview-g7lXGK1xNaiT6EzDJqKHyQ==/lib/x86_64:/data/app/~~k6aHJnC3eKxQRhv7CpABuA==/com.google.android.webview-g7lXGK1xNaiT6EzDJqKHyQ==/WebViewGoogle.apk!/lib/x86_64:/data/app/~~RacrRViy9-egVJD75x39bg==/com.google.android.trichromelibrary_567263637-bjPeBA06ScJHWvq2gcO65Q==/TrichromeLibrary.apk!/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/com.google.android.webview
+11-17 21:04:16.073  3248  3248 D nativeloader: Configuring clns-7 for other apk /data/app/~~k6aHJnC3eKxQRhv7CpABuA==/com.google.android.webview-g7lXGK1xNaiT6EzDJqKHyQ==/WebViewGoogle.apk. target_sdk_version=34, uses_libraries=, library_path=/data/app/~~k6aHJnC3eKxQRhv7CpABuA==/com.google.android.webview-g7lXGK1xNaiT6EzDJqKHyQ==/lib/x86_64:/data/app/~~k6aHJnC3eKxQRhv7CpABuA==/com.google.android.webview-g7lXGK1xNaiT6EzDJqKHyQ==/WebViewGoogle.apk!/lib/x86_64:/data/app/~~RacrRViy9-egVJD75x39bg==/com.google.android.trichromelibrary_567263637-bjPeBA06ScJHWvq2gcO65Q==/TrichromeLibrary.apk!/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/com.google.android.webview
+11-17 21:04:16.216  3248  3248 I cr_WebViewApkApp: Launched version=113.0.5672.136 minSdkVersion=29 isBundle=false processName=com.google.android.webview:webview_service
+11-17 21:04:16.837  1664  2239 I cr_CronetLibraryLoader: Cronet version: 113.0.5672.51, arch: x86_64
+11-17 21:04:17.333  3248  3432 I cr_VariationsUtils: Scheduling seed download job
+11-17 21:04:17.449  3248  3393 I cr_VariationsUtils: Downloading new seed
+11-17 21:04:17.708  3248  3393 I cr_VariationsSeedFetch: Fetched first run seed in 258 ms
+11-17 21:04:17.885   518   548 D SystemServerTimingAsync: ssm.onUnlockedUser-0_com.android.server.webkit.WebViewUpdateService
+11-17 21:04:17.885   518   548 V SystemServerTimingAsync: ssm.onUnlockedUser-0_com.android.server.webkit.WebViewUpdateService took to complete: 0ms
+11-17 21:04:18.940  3344  3394 I cr_CronetLibraryLoader: Cronet version: 113.0.5672.51, arch: x86_64
+11-17 21:04:23.180   518  3945 D SystemServerTimingAsync: ssm.onCompletedEventUser-0_{|Unlocked|}_com.android.server.webkit.WebViewUpdateService
+11-17 21:04:23.180   518  3945 V SystemServerTimingAsync: ssm.onCompletedEventUser-0_{|Unlocked|}_com.android.server.webkit.WebViewUpdateService took to complete: 0ms
+11-17 21:04:25.148  1664  2239 I cr_CronetLibraryLoader: Cronet version: 102.0.4973.2, arch: x86_64
+11-17 21:04:26.519  1043  1078 D PrefCtrlListHelper: Could not find Context-only controller for pref: com.android.settings.deviceinfo.legal.WebViewLicensePreferenceController
+11-17 21:04:30.958  4474  4474 D nativeloader: InitDefaultPublicLibraries for_preload=1: libandroid.so:libaaudio.so:libamidi.so:libbinder_ndk.so:libc.so:libcamera2ndk.so:libdl.so:libEGL.so:libGLESv1_CM.so:libGLESv2.so:libGLESv3.so:libicu.so:libicui18n.so:libicuuc.so:libjnigraphics.so:liblog.so:libmediandk.so:libm.so:libnativehelper.so:libnativewindow.so:libOpenMAXAL.so:libOpenSLES.so:libRS.so:libstdc++.so:libsync.so:libvulkan.so:libwebviewchromium_plat_support.so:libz.so
+11-17 21:04:33.314  2552  2552 I WebViewFactory: Loading com.google.android.webview version 113.0.5672.136 (code 567263637)
+11-17 21:04:33.321  2552  2552 D nativeloader: Configuring clns-7 for other apk /data/app/~~RacrRViy9-egVJD75x39bg==/com.google.android.trichromelibrary_567263637-bjPeBA06ScJHWvq2gcO65Q==/TrichromeLibrary.apk. target_sdk_version=34, uses_libraries=ALL, library_path=/data/app/~~k6aHJnC3eKxQRhv7CpABuA==/com.google.android.webview-g7lXGK1xNaiT6EzDJqKHyQ==/lib/x86_64:/data/app/~~k6aHJnC3eKxQRhv7CpABuA==/com.google.android.webview-g7lXGK1xNaiT6EzDJqKHyQ==/WebViewGoogle.apk!/lib/x86_64:/data/app/~~RacrRViy9-egVJD75x39bg==/com.google.android.trichromelibrary_567263637-bjPeBA06ScJHWvq2gcO65Q==/TrichromeLibrary.apk!/lib/x86_64, permitted_path=/data:/mnt/expand
+11-17 21:04:33.323  2552  2552 D nativeloader: Configuring clns-8 for other apk /data/app/~~k6aHJnC3eKxQRhv7CpABuA==/com.google.android.webview-g7lXGK1xNaiT6EzDJqKHyQ==/WebViewGoogle.apk. target_sdk_version=34, uses_libraries=, library_path=/data/app/~~k6aHJnC3eKxQRhv7CpABuA==/com.google.android.webview-g7lXGK1xNaiT6EzDJqKHyQ==/lib/x86_64:/data/app/~~k6aHJnC3eKxQRhv7CpABuA==/com.google.android.webview-g7lXGK1xNaiT6EzDJqKHyQ==/WebViewGoogle.apk!/lib/x86_64:/data/app/~~RacrRViy9-egVJD75x39bg==/com.google.android.trichromelibrary_567263637-bjPeBA06ScJHWvq2gcO65Q==/TrichromeLibrary.apk!/lib/x86_64, permitted_path=/data:/mnt/expand
+11-17 21:04:33.359  2552  2552 I cr_WVCFactoryProvider: Loaded version=113.0.5672.136 minSdkVersion=29 isBundle=false multiprocess=true packageId=2
+11-17 21:04:33.390  2552  4581 I cr_VariationsUtils: Failed reading seed file "/data/user/0/com.rkacast/app_webview/variations_seed_new"
+11-17 21:04:33.391  2552  4581 I cr_VariationsUtils: Failed reading seed file "/data/user/0/com.rkacast/app_webview/variations_seed"
+11-17 21:04:33.392  2552  4581 I cr_VariationsUtils: Requesting new seed from IVariationsSeedServer
+11-17 21:04:33.399  2552  2552 I cr_LibraryLoader: Successfully loaded native library
+11-17 21:04:33.400  2552  2552 I cr_CachingUmaRecorder: Flushed 8 samples from 8 histograms.
+11-17 21:04:33.446   518   549 I ActivityManager: Start proc 4585:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0ai9000 for  {com.rkacast/org.chromium.content.app.SandboxedProcessService0:0}
+11-17 21:04:33.558  4585  4585 I cr_WebViewApkApp: Launched version=113.0.5672.136 minSdkVersion=29 isBundle=false processName=com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0
+11-17 21:04:33.561  4585  4585 I cr_ChildProcessService: Creating new ChildProcessService pid=4585
+11-17 21:04:33.602   518   549 I ActivityManager: Start proc 4619:com.google.android.webview:webview_apk/u0a134 for service {com.google.android.webview/org.chromium.android_webview.nonembedded.AwComponentUpdateService}
+11-17 21:04:33.668  2552  4605 W cr_media: BLUETOOTH_CONNECT permission is missing.
+11-17 21:04:33.687  2552  4605 W cr_media: registerBluetoothIntentsIfNeeded: Requires BLUETOOTH permission
+11-17 21:04:33.707  4585  4617 I cr_LibraryLoader: Successfully loaded native library
+11-17 21:04:33.713  4585  4617 I cr_CachingUmaRecorder: Flushed 2 samples from 2 histograms.
+11-17 21:04:33.723  4619  4619 D nativeloader: Configuring clns-6 for other apk /data/app/~~RacrRViy9-egVJD75x39bg==/com.google.android.trichromelibrary_567263637-bjPeBA06ScJHWvq2gcO65Q==/TrichromeLibrary.apk. target_sdk_version=34, uses_libraries=ALL, library_path=/data/app/~~k6aHJnC3eKxQRhv7CpABuA==/com.google.android.webview-g7lXGK1xNaiT6EzDJqKHyQ==/lib/x86_64:/data/app/~~k6aHJnC3eKxQRhv7CpABuA==/com.google.android.webview-g7lXGK1xNaiT6EzDJqKHyQ==/WebViewGoogle.apk!/lib/x86_64:/data/app/~~RacrRViy9-egVJD75x39bg==/com.google.android.trichromelibrary_567263637-bjPeBA06ScJHWvq2gcO65Q==/TrichromeLibrary.apk!/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/com.google.android.webview
+11-17 21:04:33.748  4619  4619 D nativeloader: Configuring clns-7 for other apk /data/app/~~k6aHJnC3eKxQRhv7CpABuA==/com.google.android.webview-g7lXGK1xNaiT6EzDJqKHyQ==/WebViewGoogle.apk. target_sdk_version=34, uses_libraries=, library_path=/data/app/~~k6aHJnC3eKxQRhv7CpABuA==/com.google.android.webview-g7lXGK1xNaiT6EzDJqKHyQ==/lib/x86_64:/data/app/~~k6aHJnC3eKxQRhv7CpABuA==/com.google.android.webview-g7lXGK1xNaiT6EzDJqKHyQ==/WebViewGoogle.apk!/lib/x86_64:/data/app/~~RacrRViy9-egVJD75x39bg==/com.google.android.trichromelibrary_567263637-bjPeBA06ScJHWvq2gcO65Q==/TrichromeLibrary.apk!/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/com.google.android.webview
+11-17 21:04:33.787  4619  4619 I cr_WebViewApkApp: Launched version=113.0.5672.136 minSdkVersion=29 isBundle=false processName=com.google.android.webview:webview_apk
+11-17 21:04:33.876  4619  4619 I cr_LibraryLoader: Successfully loaded native library
+11-17 21:04:34.126  3248  3432 I cr_VariationsUtils: Throttling seed download job
+11-17 21:04:34.126  3248  3432 I cr_VariationsUtils: Writing new seed to app's data directory
+11-17 21:04:34.331  4619  4651 W cr_AWNetworkFetcherTask: IOException during downloadToFile.
+11-17 21:04:34.331  4619  4651 W cr_AWNetworkFetcherTask: java.io.IOException: Cleartext HTTP traffic to edgedl.me.gvt1.com not permitted
+11-17 21:04:34.331  4619  4651 W cr_AWNetworkFetcherTask: 	at com.android.okhttp.HttpHandler$CleartextURLFilter.checkURLPermitted(HttpHandler.java:127)
+11-17 21:04:34.331  4619  4651 W cr_AWNetworkFetcherTask: 	at com.android.okhttp.internal.huc.HttpURLConnectionImpl.execute(HttpURLConnectionImpl.java:462)
+11-17 21:04:34.331  4619  4651 W cr_AWNetworkFetcherTask: 	at com.android.okhttp.internal.huc.HttpURLConnectionImpl.getResponse(HttpURLConnectionImpl.java:411)
+11-17 21:04:34.331  4619  4651 W cr_AWNetworkFetcherTask: 	at com.android.okhttp.internal.huc.HttpURLConnectionImpl.getResponseCode(HttpURLConnectionImpl.java:542)
+11-17 21:04:34.331  4619  4651 W cr_AWNetworkFetcherTask: 	at org.chromium.android_webview.nonembedded.NetworkFetcherTask.download(chromium-TrichromeWebViewGoogle6432.apk-stable-567263637:48)
+11-17 21:04:34.373  2552  2552 I chromium: [INFO:CONSOLE(0)] "Error with Permissions-Policy header: Origin trial controlled feature not enabled: 'interest-cohort'.", source:  (0)
+11-17 21:04:37.234  2552  2552 I chromium: [INFO:CONSOLE(47)] "Deprecated API for given entry type.", source: https://duckduckgo.com/ (47)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: Exception in upload method
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: com.google.android.apps.gsa.shared.r.d: Error code: 262182
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.shared.ab.bk.d(PG:5)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.gsa.c.a.ar.d(PG:1)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.gsa.c.a.bo.b(PG:5)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.gsa.c.a.e.a(PG:2)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.gsa.c.a.a.run(PG:2)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.bf.execute(PG:1)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.i(PG:1)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.l(PG:12)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.cancel(PG:8)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.m(PG:2)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.j.a(PG:1)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.l(PG:3)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.cancel(PG:8)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.m(PG:2)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.j.a(PG:1)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.l(PG:3)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.cancel(PG:8)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.m(PG:2)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.j.a(PG:1)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.l(PG:3)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.cancel(PG:8)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.m(PG:2)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.j.a(PG:1)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.l(PG:3)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.cancel(PG:8)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.m(PG:2)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.c.a(PG:1)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.l(PG:3)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.cancel(PG:8)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.bu.cancel(PG:1)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.cancel(PG:17)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.staticplugins.bk.b.h.run(PG:2)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.bf.execute(PG:1)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.i(PG:1)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.l(PG:12)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.cancel(PG:8)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.m(PG:2)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.j.a(PG:1)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.l(PG:3)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.cancel(PG:8)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.shared.util.c.aj.a(PG:2)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.l(PG:3)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.cancel(PG:8)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.m(PG:2)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.c.a(PG:1)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.l(PG:3)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.common.util.concurrent.d.cancel(PG:8)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.s3.o.c(PG:2)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.s3.r.a(PG:1)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.staticplugins.dc.a.c.e(PG:2)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.staticplugins.dc.a.c.c(PG:3)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.staticplugins.dc.a.e.a(PG:5)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.s3.n.hh(PG:1)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.cd.g.a.f.e(PG:2)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.speech.k.a.g.d(PG:22)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.speech.k.a.g.ks(PG:6)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.s3.o.e(PG:14)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.s3.p.run(PG:1)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:487)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at java.util.concurrent.FutureTask.run(FutureTask.java:264)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.shared.util.c.a.e.run(PG:2)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.shared.util.c.a.bi.run(PG:1)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.shared.util.c.a.bi.run(PG:1)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at java.lang.Thread.run(Thread.java:1012)
+11-17 21:04:40.284  1664  2433 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.shared.util.c.a.l.run(PG:5)
+11-17 21:04:40.498  4773  4773 D nativeloader: InitDefaultPublicLibraries for_preload=1: libandroid.so:libaaudio.so:libamidi.so:libbinder_ndk.so:libc.so:libcamera2ndk.so:libdl.so:libEGL.so:libGLESv1_CM.so:libGLESv2.so:libGLESv3.so:libicu.so:libicui18n.so:libicuuc.so:libjnigraphics.so:liblog.so:libmediandk.so:libm.so:libnativehelper.so:libnativewindow.so:libOpenMAXAL.so:libOpenSLES.so:libRS.so:libstdc++.so:libsync.so:libvulkan.so:libwebviewchromium_plat_support.so:libz.so
+11-17 21:04:40.760  1394  1476 I cr_CronetLibraryLoader: Cronet version: 113.0.5672.51, arch: x86_64
+11-17 21:04:42.170  4805  4805 D nativeloader: Configuring clns-6 for other apk /data/app/~~RacrRViy9-egVJD75x39bg==/com.google.android.trichromelibrary_567263637-bjPeBA06ScJHWvq2gcO65Q==/TrichromeLibrary.apk. target_sdk_version=34, uses_libraries=ALL, library_path=/data/app/~~k6aHJnC3eKxQRhv7CpABuA==/com.google.android.webview-g7lXGK1xNaiT6EzDJqKHyQ==/lib/x86_64:/data/app/~~k6aHJnC3eKxQRhv7CpABuA==/com.google.android.webview-g7lXGK1xNaiT6EzDJqKHyQ==/WebViewGoogle.apk!/lib/x86_64:/data/app/~~RacrRViy9-egVJD75x39bg==/com.google.android.trichromelibrary_567263637-bjPeBA06ScJHWvq2gcO65Q==/TrichromeLibrary.apk!/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/com.google.android.webview
+11-17 21:04:42.172  4805  4805 D nativeloader: Configuring clns-7 for other apk /data/app/~~k6aHJnC3eKxQRhv7CpABuA==/com.google.android.webview-g7lXGK1xNaiT6EzDJqKHyQ==/WebViewGoogle.apk. target_sdk_version=34, uses_libraries=, library_path=/data/app/~~k6aHJnC3eKxQRhv7CpABuA==/com.google.android.webview-g7lXGK1xNaiT6EzDJqKHyQ==/lib/x86_64:/data/app/~~k6aHJnC3eKxQRhv7CpABuA==/com.google.android.webview-g7lXGK1xNaiT6EzDJqKHyQ==/WebViewGoogle.apk!/lib/x86_64:/data/app/~~RacrRViy9-egVJD75x39bg==/com.google.android.trichromelibrary_567263637-bjPeBA06ScJHWvq2gcO65Q==/TrichromeLibrary.apk!/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/com.google.android.webview
+11-17 21:04:42.179  4805  4805 I cr_WebViewApkApp: Launched version=113.0.5672.136 minSdkVersion=29 isBundle=false processName=com.google.android.webview
+11-17 21:04:45.024  4318  4444 I cr_CronetLibraryLoader: Cronet version: 113.0.5672.51, arch: x86_64
+11-17 21:04:45.273  4318  4892 I cr_CronetUrlRequestContext: destroyNativeStreamLocked org.chromium.net.impl.CronetBidirectionalStream@969b344
+11-17 21:04:47.076  1043  1064 D PrefCtrlListHelper: Could not find Context-only controller for pref: com.android.settings.deviceinfo.legal.WebViewLicensePreferenceController
+11-17 21:04:47.142  1043  4267 D PrefCtrlListHelper: Could not find Context-only controller for pref: com.android.settings.deviceinfo.legal.WebViewLicensePreferenceController
+11-17 21:04:58.028   518   817 W ActivityManager: Exception when unbinding service com.rkacast/org.chromium.content.app.SandboxedProcessService0:0
+11-17 21:04:58.028   518   817 I ActivityManager: Killing 4585:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0a192i0 (adj 900): isolated not needed
+11-17 21:05:01.382  5275  5326 I cr_CronetLibraryLoader: Cronet version: 113.0.5672.51, arch: x86_64
+11-17 21:05:04.410  5637  5637 D nativeloader: InitDefaultPublicLibraries for_preload=1: libandroid.so:libaaudio.so:libamidi.so:libbinder_ndk.so:libc.so:libcamera2ndk.so:libdl.so:libEGL.so:libGLESv1_CM.so:libGLESv2.so:libGLESv3.so:libicu.so:libicui18n.so:libicuuc.so:libjnigraphics.so:liblog.so:libmediandk.so:libm.so:libnativehelper.so:libnativewindow.so:libOpenMAXAL.so:libOpenSLES.so:libRS.so:libstdc++.so:libsync.so:libvulkan.so:libwebviewchromium_plat_support.so:libz.so
+11-17 21:05:07.240  5737  5737 I RKA/App : Started RKACast 0.2.19 (build 19) · Android 14 (SDK 34) · Google sdk_gphone64_x86_64
+11-17 21:05:14.965  5895  5895 D nativeloader: InitDefaultPublicLibraries for_preload=1: libandroid.so:libaaudio.so:libamidi.so:libbinder_ndk.so:libc.so:libcamera2ndk.so:libdl.so:libEGL.so:libGLESv1_CM.so:libGLESv2.so:libGLESv3.so:libicu.so:libicui18n.so:libicuuc.so:libjnigraphics.so:liblog.so:libmediandk.so:libm.so:libnativehelper.so:libnativewindow.so:libOpenMAXAL.so:libOpenSLES.so:libRS.so:libstdc++.so:libsync.so:libvulkan.so:libwebviewchromium_plat_support.so:libz.so
+11-17 21:05:23.341  5945  5945 D nativeloader: InitDefaultPublicLibraries for_preload=1: libandroid.so:libaaudio.so:libamidi.so:libbinder_ndk.so:libc.so:libcamera2ndk.so:libdl.so:libEGL.so:libGLESv1_CM.so:libGLESv2.so:libGLESv3.so:libicu.so:libicui18n.so:libicuuc.so:libjnigraphics.so:liblog.so:libmediandk.so:libm.so:libnativehelper.so:libnativewindow.so:libOpenMAXAL.so:libOpenSLES.so:libRS.so:libstdc++.so:libsync.so:libvulkan.so:libwebviewchromium_plat_support.so:libz.so
