@@ -53,6 +53,15 @@ object Settings {
         prefs.edit().putString("subtitleLang", v).apply()
     }
 
+    private val _audioLang = MutableStateFlow("")
+    /** Preferred audio language (ISO 639-2, e.g. "eng"); empty = use the stream's default. */
+    val audioLang: StateFlow<String> = _audioLang
+
+    fun setAudioLang(v: String) {
+        _audioLang.value = v.trim().lowercase()
+        prefs.edit().putString("audioLang", _audioLang.value).apply()
+    }
+
     private val _autoNext = MutableStateFlow(true)
     val autoNext: StateFlow<Boolean> = _autoNext
 
@@ -79,6 +88,7 @@ object Settings {
         _stremioAuthKey.value = prefs.getString("stremioAuthKey", null)
         _subtitleScale.value = prefs.getFloat("subtitleScale", 1.0f)
         _autoNext.value = prefs.getBoolean("autoNext", true)
+        _audioLang.value = prefs.getString("audioLang", "")!!
         _phonePlayer.value = runCatching { PhonePlayer.valueOf(prefs.getString("phonePlayer", "BUILT_IN")!!) }.getOrDefault(PhonePlayer.BUILT_IN)
         _subtitleLang.value = prefs.getString("subtitleLang", "eng")!!
         _history.value = runCatching {

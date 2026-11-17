@@ -43,6 +43,9 @@ class PlayerActivity : ComponentActivity() {
                 )
             }
         }.build()
+        com.rkacast.data.Settings.audioLang.value.takeIf { it.isNotBlank() }?.let { lang ->
+            p.trackSelectionParameters = p.trackSelectionParameters.buildUpon().setPreferredAudioLanguage(lang).build()
+        }
         p.setMediaItem(item)
         p.prepare()
         p.playWhenReady = true

@@ -48,6 +48,8 @@ data class CastMedia(
     val startPositionMs: Long = 0,
 )
 
+data class AudioTrack(val id: Long, val name: String?, val language: String?)
+
 data class PlayerState(
     val media: CastMedia? = null,
     val isPlaying: Boolean = false,
@@ -58,6 +60,9 @@ data class PlayerState(
     val error: String? = null,
     /** True once the TV reports the video played to the end (not when the user stopped it). */
     val finished: Boolean = false,
+    /** Audio tracks reported by the receiver (Chromecast only; DLNA can't report or switch them). */
+    val audioTracks: List<AudioTrack> = emptyList(),
+    val activeAudioId: Long? = null,
 )
 
 /** One API over Google Cast (Chromecast / Google TV / Android TV) and DLNA renderers. */
@@ -319,6 +324,7 @@ object CastManager {
     private fun currentClient(): RemoteMediaClient? = castContext?.sessionManager?.currentCastSession?.remoteMediaClient
 
     private fun loadOnCast(client: RemoteMediaClient, media: CastMedia) {
+        loadCounter++
         val metadata = MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE).apply {
             putString(MediaMetadata.KEY_TITLE, media.title)
             media.posterUrl?.let { addImage(WebImage(Uri.parse(it))) }
@@ -375,6 +381,35 @@ object CastManager {
 
     private var lastLoggedState = -1
 
+    /** Language of the audio track the user picked; re-applied after every reload (subtitle change, resume, next episode). */
+    private var chosenAudioLang: String? = null
+    private var audioAppliedForLoad = -1
+    private var loadCounter = 0
+
+    fun selectAudio(track: AudioTrack) {
+        chosenAudioLang = track.language
+        applyAudio(track.id)
+    }
+
+    private fun applyAudio(audioId: Long) {
+        val client = currentClient() ?: return
+        val ids = buildList {
+            add(audioId)
+            if (_state.value.media?.subtitleUrl != null) add(1L) // keep subtitles on
+        }.toLongArray()
+        DebugLog.i("Cast", "Set active tracks ${ids.joinToString()}")
+        client.setActiveMediaTracks(ids)
+        _state.value = _state.value.copy(activeAudioId = audioId)
+    }
+
+    private fun maybeApplyPreferredAudio(tracks: List<AudioTrack>) {
+        if (audioAppliedForLoad == loadCounter || tracks.size < 2) return
+        audioAppliedForLoad = loadCounter
+        val wanted = chosenAudioLang ?: com.rkacast.data.Settings.audioLang.value.ifBlank { null } ?: return
+        val match = tracks.firstOrNull { com.rkacast.data.LanguageUtils.sameLanguage(it.language, wanted) } ?: return
+        if (match.id != _state.value.activeAudioId) applyAudio(match.id)
+    }
+
     private val mediaCallback = object : RemoteMediaClient.Callback() {
         override fun onStatusUpdated() {
             val client = currentClient() ?: return
@@ -383,8 +418,18 @@ object CastManager {
                 lastLoggedState = ps
                 DebugLog.i("Cast", "Player state=$ps idleReason=${client.idleReason}")
             }
+            val tracks = client.mediaInfo?.mediaTracks.orEmpty()
+                .filter { it.type == MediaTrack.TYPE_AUDIO }
+                .map { AudioTrack(it.id, it.name, it.language) }
+            val activeIds = client.mediaStatus?.activeTrackIds
+            val activeAudio = tracks.firstOrNull { t -> activeIds?.contains(t.id) == true }?.id
+            if (tracks.size != _state.value.audioTracks.size) {
+                DebugLog.i("Cast", "Receiver reports ${tracks.size} audio track(s): ${tracks.joinToString { "${it.id}:${it.language}" }}")
+            }
             _state.value = _state.value.copy(
                 finished = ps == MediaStatus.PLAYER_STATE_IDLE && client.idleReason == MediaStatus.IDLE_REASON_FINISHED,
+                audioTracks = tracks,
+                activeAudioId = activeAudio ?: _state.value.activeAudioId,
                 isPlaying = ps == MediaStatus.PLAYER_STATE_PLAYING,
                 isBuffering = ps == MediaStatus.PLAYER_STATE_BUFFERING || ps == MediaStatus.PLAYER_STATE_LOADING,
                 durationMs = client.streamDuration.coerceAtLeast(0),
@@ -400,6 +445,7 @@ object CastManager {
                     else -> ""
                 },
             )
+            if (ps == MediaStatus.PLAYER_STATE_PLAYING || ps == MediaStatus.PLAYER_STATE_PAUSED) maybeApplyPreferredAudio(tracks)
         }
     }
 

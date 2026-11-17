@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Audiotrack
 import androidx.compose.material.icons.filled.ClosedCaption
 import androidx.compose.material.icons.filled.Forward30
 import androidx.compose.material.icons.filled.Pause
@@ -61,6 +62,8 @@ fun NowPlayingBar(app: AppState) {
     if (device == null || (media == null && state.error == null)) return
 
     var dragging by remember { mutableStateOf<Float?>(null) }
+    var showAudio by remember { mutableStateOf(false) }
+    if (showAudio) AudioPickerSheet(app, state, device) { showAudio = false }
 
     Card(
         Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
@@ -98,6 +101,12 @@ fun NowPlayingBar(app: AppState) {
                 }
                 IconButton(onClick = { CastManager.seekBy(30_000) }) { Icon(Icons.Default.Forward30, "Forward 30s") }
                 Text("", Modifier.weight(1f))
+                IconButton(onClick = { showAudio = true }) {
+                    Icon(
+                        Icons.Default.Audiotrack, "Audio track",
+                        tint = if (state.audioTracks.size > 1) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                    )
+                }
                 IconButton(onClick = { app.showSubtitlePicker = true }) {
                     Icon(
                         Icons.Default.ClosedCaption, "Subtitles",

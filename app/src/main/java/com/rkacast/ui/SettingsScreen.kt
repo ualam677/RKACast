@@ -44,6 +44,8 @@ fun SettingsScreen(app: AppState) {
     val torrent by TorrentEngine.status.collectAsState()
     val phonePlayer by Settings.phonePlayer.collectAsState()
     val autoNext by Settings.autoNext.collectAsState()
+    val audioLang by Settings.audioLang.collectAsState()
+    var audioInput by remember(audioLang) { mutableStateOf(audioLang) }
     val vlcInstalled = remember { com.rkacast.player.VlcLauncher.isInstalled(app.context) }
     var serverInput by remember(server) { mutableStateOf(server) }
     var showLog by remember { mutableStateOf(false) }
@@ -102,6 +104,14 @@ fun SettingsScreen(app: AppState) {
             }
             Switch(autoNext, { Settings.setAutoNext(it) })
         }
+        Spacer(Modifier.height(8.dp))
+        OutlinedTextField(
+            audioInput, { audioInput = it.lowercase().take(3) },
+            label = { Text("Preferred audio language (eng, spa, jpn…, blank = default)") },
+            supportingText = { Text(if (audioLang.isBlank()) "Using each video's default audio" else "Currently: ${languageName(audioLang)}") },
+            singleLine = true, modifier = Modifier.fillMaxWidth(),
+        )
+        Button(onClick = { Settings.setAudioLang(audioInput) }, enabled = audioInput.isEmpty() || audioInput.length == 3) { Text("Save audio language") }
         Spacer(Modifier.height(12.dp))
         Text("\"Play here\" player", style = MaterialTheme.typography.titleMedium)
         Row(Modifier.fillMaxWidth().clickable { Settings.setPhonePlayer(PhonePlayer.BUILT_IN) }, verticalAlignment = Alignment.CenterVertically) {
