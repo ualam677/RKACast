@@ -84,6 +84,7 @@ dependencies {
     // Google Cast (Chromecast / Google TV / Android TV)
     implementation("com.google.android.gms:play-services-cast-framework:22.0.0")
     implementation("androidx.mediarouter:mediarouter:1.7.0")
+    implementation("androidx.media:media:1.7.0")
 
     // Local playback on the phone
     implementation("androidx.media3:media3-exoplayer:1.5.1")

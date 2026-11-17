@@ -43,6 +43,7 @@ fun SettingsScreen(app: AppState) {
     val subLang by Settings.subtitleLang.collectAsState()
     val torrent by TorrentEngine.status.collectAsState()
     val phonePlayer by Settings.phonePlayer.collectAsState()
+    val autoNext by Settings.autoNext.collectAsState()
     val vlcInstalled = remember { com.rkacast.player.VlcLauncher.isInstalled(app.context) }
     var serverInput by remember(server) { mutableStateOf(server) }
     var showLog by remember { mutableStateOf(false) }
@@ -93,6 +94,15 @@ fun SettingsScreen(app: AppState) {
         Button(onClick = { Settings.setSubtitleLang(langInput) }, enabled = langInput.length == 3) { Text("Save language") }
 
         Spacer(Modifier.height(16.dp)); HorizontalDivider(); Spacer(Modifier.height(16.dp))
+        Text("Playback", style = MaterialTheme.typography.titleMedium)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text("Auto-play next episode")
+                Text("Stremio series: plays the next episode from the same source after a 10 s countdown.", style = MaterialTheme.typography.bodySmall)
+            }
+            Switch(autoNext, { Settings.setAutoNext(it) })
+        }
+        Spacer(Modifier.height(12.dp))
         Text("\"Play here\" player", style = MaterialTheme.typography.titleMedium)
         Row(Modifier.fillMaxWidth().clickable { Settings.setPhonePlayer(PhonePlayer.BUILT_IN) }, verticalAlignment = Alignment.CenterVertically) {
             RadioButton(phonePlayer == PhonePlayer.BUILT_IN, { Settings.setPhonePlayer(PhonePlayer.BUILT_IN) })

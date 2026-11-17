@@ -90,7 +90,15 @@ sealed interface StremioRoute {
     data object Discover : StremioRoute
     data class Search(val query: String) : StremioRoute
     data class Detail(val type: String, val id: String, val preview: MetaPreview?) : StremioRoute
-    data class Streams(val type: String, val videoId: String, val title: String, val poster: String?) : StremioRoute
+    data class Streams(
+        val type: String,
+        val videoId: String,
+        val title: String,
+        val poster: String?,
+        val metaId: String? = null,
+        val metaName: String? = null,
+        val videos: List<com.rkacast.stremio.Video> = emptyList(),
+    ) : StremioRoute
     data object Addons : StremioRoute
 }
 
@@ -185,8 +193,42 @@ private fun DiscoverScreen(addons: List<InstalledAddon>, push: (StremioRoute) ->
                 IconButton(onClick = { push(StremioRoute.Addons) }) { Icon(Icons.Default.Extension, "Addons") }
             }
         }
+        item { ContinueWatchingRow(push) }
         items(rows, key = { "${it.addon.manifest.id}/${it.catalog.type}/${it.catalog.id}" }) { row ->
             CatalogRowView(row, push)
+        }
+    }
+}
+
+@Composable
+private fun ContinueWatchingRow(push: (StremioRoute) -> Unit) {
+    val all by com.rkacast.playback.WatchHistory.entries.collectAsState()
+    val items = remember(all) { com.rkacast.playback.WatchHistory.continueWatching().filter { it.videoId != null && it.type != null } }
+    if (items.isEmpty()) return
+    Column(Modifier.padding(vertical = 6.dp)) {
+        Text("Continue watching", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 16.dp))
+        Spacer(Modifier.height(6.dp))
+        LazyRow(contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp)) {
+            items(items, key = { it.key }) { e ->
+                Column(Modifier.width(160.dp).padding(horizontal = 4.dp).clickable {
+                    push(StremioRoute.Streams(e.type!!, e.videoId!!, e.title, e.poster, e.metaId, e.metaName))
+                }) {
+                    Box {
+                        AsyncImage(
+                            model = e.poster, contentDescription = e.title, contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxWidth().aspectRatio(16f / 9).clip(RoundedCornerShape(8.dp)),
+                        )
+                        IconButton(
+                            onClick = { com.rkacast.playback.WatchHistory.remove(e.key) },
+                            modifier = Modifier.align(Alignment.TopEnd).size(28.dp),
+                        ) { Icon(Icons.Default.Delete, "Remove", Modifier.size(16.dp)) }
+                    }
+                    androidx.compose.material3.LinearProgressIndicator(
+                        progress = { e.progress }, modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
+                    )
+                    Text(e.title, style = MaterialTheme.typography.bodySmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                }
+            }
         }
     }
 }
@@ -358,7 +400,7 @@ private fun DetailScreen(
                 if (!loading && (m == null || m.videos.isEmpty() || route.type == "movie")) {
                     Button(onClick = {
                         val vid = if (route.type == "movie" || m?.videos.isNullOrEmpty()) route.id else m!!.videos.first().id
-                        push(StremioRoute.Streams(route.type, vid, name, poster))
+                        push(StremioRoute.Streams(route.type, vid, name, poster, route.id, name, m?.videos ?: emptyList()))
                     }, modifier = Modifier.fillMaxWidth()) { Icon(Icons.Default.Cast, null); Text("  Find streams") }
                 }
             }
@@ -380,7 +422,7 @@ private fun DetailScreen(
                 Row(
                     Modifier.fillMaxWidth().clickable {
                         val label = if (v.season != null) "$name S${v.season}E${v.episode} · ${v.label}" else "$name · ${v.label}"
-                        push(StremioRoute.Streams(route.type, v.id, label, v.thumbnail ?: poster))
+                        push(StremioRoute.Streams(route.type, v.id, label, v.thumbnail ?: poster, route.id, name, m.videos))
                     }.padding(horizontal = 16.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -408,6 +450,20 @@ private fun StreamsScreen(app: AppState, addons: List<InstalledAddon>, route: St
     var streams by remember(route) { mutableStateOf<List<AddonStream>?>(null) }
     var subs by remember(route) { mutableStateOf<List<Subtitle>>(emptyList()) }
     var chosenSub by remember(route) { mutableStateOf<SubtitlePick?>(null) }
+    val resumeAt = remember(route) { com.rkacast.playback.PlaybackTracker.resumePositionFor(com.rkacast.playback.WatchHistory.stremioKey(route.videoId)) }
+    var resume by remember(route) { mutableStateOf(resumeAt > 0) }
+    // Opened from Continue Watching: fetch the episode list so auto-next works.
+    var videos by remember(route) { mutableStateOf(route.videos) }
+    LaunchedEffect(route) {
+        if (videos.isEmpty() && route.type == "series" && route.metaId != null) {
+            videos = runCatching { StremioClient.meta(addons, route.type, route.metaId)?.videos }.getOrNull() ?: emptyList()
+        }
+    }
+    fun contextFor(s: AddonStream) = com.rkacast.playback.PlaybackContext(
+        title = route.title, poster = route.poster, type = route.type, metaId = route.metaId ?: route.videoId.substringBefore(':'),
+        videoId = route.videoId, metaName = route.metaName, videos = videos,
+        addonName = s.addonName, bingeGroup = s.stream.behaviorHints?.bingeGroup,
+    )
 
     LaunchedEffect(route) {
         app.nextSubtitle = null
@@ -431,6 +487,14 @@ private fun StreamsScreen(app: AppState, addons: List<InstalledAddon>, route: St
             )
             if (chosenSub != null) TextButton(onClick = { chosenSub = null; app.nextSubtitle = null }) { Text("Turn off") }
         }
+        if (resumeAt > 0) {
+            Row(Modifier.padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+                FilterChip(
+                    selected = resume, onClick = { resume = !resume },
+                    label = { Text(if (resume) "Resume from ${com.rkacast.data.MediaUtils.formatTime(resumeAt)}" else "Start from beginning") },
+                )
+            }
+        }
         val list = streams
         when {
             list == null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
@@ -448,7 +512,10 @@ private fun StreamsScreen(app: AppState, addons: List<InstalledAddon>, route: St
                         Row {
                             TextButton(enabled = playable, onClick = {
                                 val sub = chosenSub?.source
-                                app.cast(if (s.stream.isTorrent) "Starting torrent…" else "Sending to TV…") {
+                                app.cast(
+                                    if (s.stream.isTorrent) "Starting torrent…" else "Sending to TV…",
+                                    contextFor(s), if (resume) resumeAt else 0,
+                                ) {
                                     MediaResolver.fromStremio(ctx, s.stream, route.title, route.poster, sub)
                                 }
                             }) { Icon(Icons.Default.Cast, null); Text(" Cast") }

@@ -41,12 +41,19 @@ class AppState(val context: Context, val scope: CoroutineScope, val snackbar: Sn
      * Resolves media (which may involve starting a torrent) and sends it to the TV. If no TV is
      * connected yet, the device picker opens and the media plays as soon as one is chosen.
      */
-    fun cast(label: String, resolve: suspend () -> CastMedia?) {
+    fun cast(
+        label: String,
+        ctx: com.rkacast.playback.PlaybackContext? = null,
+        startAt: Long = 0,
+        resolve: suspend () -> CastMedia?,
+    ) {
         job?.cancel()
         job = scope.launch {
             busy = label
             try {
-                val media = resolve() ?: throw IllegalStateException("This stream type can't be cast")
+                var media = resolve() ?: throw IllegalStateException("This stream type can't be cast")
+                if (startAt > 0) media = media.copy(startPositionMs = startAt)
+                com.rkacast.playback.PlaybackTracker.start(ctx, media.url)
                 CastManager.cast(media)
                 if (CastManager.selected.value == null) showDevicePicker = true
             } catch (e: kotlinx.coroutines.CancellationException) {

@@ -223,15 +223,15 @@ object LocalMediaServer {
                 dlnaHeaders(r)
                 return r
             }
-            val r = RangeParser.parse(session.headers["range"], totalLength)
-            if (r == null) {
+            val range = RangeParser.parse(session.headers["range"], totalLength)
+            if (range == null) {
                 val resp = newFixedLengthResponse(Response.Status.RANGE_NOT_SATISFIABLE, MIME_PLAINTEXT, "")
                 resp.addHeader("Content-Range", "bytes */$totalLength")
                 return resp
             }
-            val start = r.start
-            val end = r.end
-            val partial = r.partial
+            val start = range.start
+            val end = range.end
+            val partial = range.partial
             val len = end - start + 1
             val stream = if (session.method == Method.HEAD) "".byteInputStream() else open(start)
             val r = newFixedLengthResponse(

@@ -39,6 +39,25 @@ fun NowPlayingBar(app: AppState) {
     val device by CastManager.selected.collectAsState()
     val torrent by TorrentEngine.status.collectAsState()
     val media = state.media
+    val upNext by com.rkacast.playback.PlaybackTracker.upNext.collectAsState()
+    upNext?.let { n ->
+        Card(
+            Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+        ) {
+            Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(if (n.secondsLeft > 0) "Up next in ${n.secondsLeft}s" else "Starting next episode…", style = MaterialTheme.typography.labelMedium)
+                    Text(n.title, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+                if (n.secondsLeft > 0) {
+                    androidx.compose.material3.TextButton(onClick = { com.rkacast.playback.PlaybackTracker.playNextNow() }) { Text("Play now") }
+                    androidx.compose.material3.TextButton(onClick = { com.rkacast.playback.PlaybackTracker.cancelUpNext() }) { Text("Cancel") }
+                }
+            }
+        }
+        return
+    }
     if (device == null || (media == null && state.error == null)) return
 
     var dragging by remember { mutableStateOf<Float?>(null) }

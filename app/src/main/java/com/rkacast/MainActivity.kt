@@ -58,6 +58,22 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /** While casting (or connected to the Samsung remote), the phone's volume buttons control the TV. */
+    override fun dispatchKeyEvent(event: android.view.KeyEvent): Boolean {
+        val code = event.keyCode
+        if (code == android.view.KeyEvent.KEYCODE_VOLUME_UP || code == android.view.KeyEvent.KEYCODE_VOLUME_DOWN) {
+            val casting = com.rkacast.cast.CastManager.selected.value != null && com.rkacast.cast.CastManager.state.value.media != null
+            val remote = com.rkacast.remote.SamsungRemote.status.value == com.rkacast.remote.SamsungRemote.Status.CONNECTED
+            if (casting || remote) {
+                if (event.action == android.view.KeyEvent.ACTION_DOWN) {
+                    com.rkacast.cast.CastManager.adjustVolume(code == android.view.KeyEvent.KEYCODE_VOLUME_UP)
+                }
+                return true
+            }
+        }
+        return super.dispatchKeyEvent(event)
+    }
+
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         incoming.value = intent

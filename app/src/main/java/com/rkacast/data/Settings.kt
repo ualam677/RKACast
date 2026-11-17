@@ -53,6 +53,14 @@ object Settings {
         prefs.edit().putString("subtitleLang", v).apply()
     }
 
+    private val _autoNext = MutableStateFlow(true)
+    val autoNext: StateFlow<Boolean> = _autoNext
+
+    fun setAutoNext(v: Boolean) {
+        _autoNext.value = v
+        prefs.edit().putBoolean("autoNext", v).apply()
+    }
+
     private val _phonePlayer = MutableStateFlow(PhonePlayer.BUILT_IN)
     val phonePlayer: StateFlow<PhonePlayer> = _phonePlayer
 
@@ -70,6 +78,7 @@ object Settings {
         _proxyByDefault.value = prefs.getBoolean("proxyByDefault", false)
         _stremioAuthKey.value = prefs.getString("stremioAuthKey", null)
         _subtitleScale.value = prefs.getFloat("subtitleScale", 1.0f)
+        _autoNext.value = prefs.getBoolean("autoNext", true)
         _phonePlayer.value = runCatching { PhonePlayer.valueOf(prefs.getString("phonePlayer", "BUILT_IN")!!) }.getOrDefault(PhonePlayer.BUILT_IN)
         _subtitleLang.value = prefs.getString("subtitleLang", "eng")!!
         _history.value = runCatching {

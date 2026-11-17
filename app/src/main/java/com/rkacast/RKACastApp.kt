@@ -17,6 +17,8 @@ class RKACastApp : Application() {
         LocalMediaServer.init(this)
         TorrentEngine.init(this)
         CastManager.init(this)
+        com.rkacast.playback.WatchHistory.init(this)
+        com.rkacast.playback.PlaybackTracker.init(this)
         com.rkacast.remote.SamsungRemote.init(this)
     }
 

@@ -64,9 +64,13 @@ fun handleInput(app: AppState, raw: String, onPhone: Boolean = false) {
             app.tab = Tab.STREMIO
         }
         MediaUtils.looksLikeMedia(text) -> {
-            Settings.addHistory(text, text.substringBefore('?').substringAfterLast('/'))
+            val name = text.substringBefore('?').substringAfterLast('/')
+            Settings.addHistory(text, name)
             val resolve = suspend { MediaResolver.fromUrl(ctx, text, subtitleUrl = sub) }
-            if (onPhone) app.playOnPhone("Opening…", resolve) else app.cast("Sending to TV…", resolve)
+            val pctx = com.rkacast.playback.PlaybackContext(title = name, url = text)
+            val resumeAt = com.rkacast.playback.PlaybackTracker.resumePositionFor(pctx.key!!)
+            if (resumeAt > 0) app.message("Resuming at ${MediaUtils.formatTime(resumeAt)}")
+            if (onPhone) app.playOnPhone("Opening…", resolve) else app.cast("Sending to TV…", pctx, resumeAt, resolve)
         }
         else -> {
             // A web page: open it in the built-in browser so videos on it can be detected.

@@ -56,6 +56,8 @@ data class PlayerState(
     val durationMs: Long = 0,
     val status: String = "",
     val error: String? = null,
+    /** True once the TV reports the video played to the end (not when the user stopped it). */
+    val finished: Boolean = false,
 )
 
 /** One API over Google Cast (Chromecast / Google TV / Android TV) and DLNA renderers. */
@@ -193,6 +195,8 @@ object CastManager {
         }
         _selected.value = null
         _state.value = PlayerState()
+        // Nothing left to serve: drop the foreground service unless a torrent is still running.
+        if (com.rkacast.torrent.TorrentEngine.status.value == null) com.rkacast.server.StreamService.stop(appContext)
     }
 
     // ---------------------------------------------------------------- playback
@@ -204,6 +208,7 @@ object CastManager {
             pendingMedia = media
             return
         }
+        com.rkacast.server.StreamService.start(appContext, "Casting to ${sel.name}")
         DebugLog.i("Cast", "Cast to ${sel.kind} '${sel.name}': ${DebugLog.mediaHint(media.url)} mime=${media.mimeType} subs=${media.subtitleUrl != null} start=${media.startPositionMs}")
         _state.value = PlayerState(media = media, isBuffering = true, status = "Loading on ${sel.name}…")
         when (sel.kind) {
@@ -268,6 +273,7 @@ object CastManager {
     fun seekBy(deltaMs: Long) = seekTo(_state.value.positionMs + deltaMs)
 
     fun stopMedia() {
+        com.rkacast.playback.PlaybackTracker.onUserStop()
         when (_selected.value?.kind) {
             DeviceKind.CHROMECAST -> currentClient()?.stop()
             DeviceKind.DLNA -> dlna?.let { c -> scope.launch { runCatching { c.stop() } } }
@@ -275,6 +281,27 @@ object CastManager {
         }
         dlnaPoll?.cancel()
         _state.value = PlayerState(status = _selected.value?.let { "Connected to ${it.name}" } ?: "")
+    }
+
+    private var dlnaVolume = 30
+
+    /** Volume up/down for whatever is being watched; prefers the Samsung TV remote when connected. */
+    fun adjustVolume(up: Boolean) {
+        if (com.rkacast.remote.SamsungRemote.status.value == com.rkacast.remote.SamsungRemote.Status.CONNECTED) {
+            com.rkacast.remote.SamsungRemote.key(if (up) "KEY_VOLUP" else "KEY_VOLDOWN")
+            return
+        }
+        when (_selected.value?.kind) {
+            DeviceKind.CHROMECAST -> runCatching {
+                val s = castContext?.sessionManager?.currentCastSession ?: return
+                s.volume = (s.volume + if (up) 0.05 else -0.05).coerceIn(0.0, 1.0)
+            }
+            DeviceKind.DLNA -> {
+                dlnaVolume = (dlnaVolume + if (up) 5 else -5).coerceIn(0, 100)
+                dlna?.let { c -> val v = dlnaVolume; scope.launch { runCatching { c.setVolume(v) } } }
+            }
+            null -> {}
+        }
     }
 
     fun setVolume(fraction: Float) {
@@ -355,6 +382,7 @@ object CastManager {
                 DebugLog.i("Cast", "Player state=$ps idleReason=${client.idleReason}")
             }
             _state.value = _state.value.copy(
+                finished = ps == MediaStatus.PLAYER_STATE_IDLE && client.idleReason == MediaStatus.IDLE_REASON_FINISHED,
                 isPlaying = ps == MediaStatus.PLAYER_STATE_PLAYING,
                 isBuffering = ps == MediaStatus.PLAYER_STATE_BUFFERING || ps == MediaStatus.PLAYER_STATE_LOADING,
                 durationMs = client.streamDuration.coerceAtLeast(0),
@@ -426,11 +454,22 @@ object CastManager {
     private fun startDlnaPolling(c: DlnaController) {
         dlnaPoll?.cancel()
         dlnaPoll = scope.launch {
+            var prevState = ""
+            var lastPos = 0L
+            var lastDur = 0L
             while (isActive && dlna === c) {
                 runCatching {
                     val pos = c.position()
                     val ts = c.transportState()
+                    if (pos.positionMs > 0) lastPos = pos.positionMs
+                    if (pos.durationMs > 0) lastDur = pos.durationMs
+                    // DLNA has no "finished" event: PLAYING -> STOPPED within 30 s of the end counts as finished.
+                    val endedNaturally = (prevState == "PLAYING" || prevState == "TRANSITIONING") &&
+                        (ts == "STOPPED" || ts == "NO_MEDIA_PRESENT") && lastDur > 0 && lastPos >= lastDur - 30_000
+                    if (ts != prevState) DebugLog.i("DLNA", "State $prevState -> $ts at ${lastPos / 1000}s/${lastDur / 1000}s")
+                    prevState = ts
                     _state.value = _state.value.copy(
+                        finished = _state.value.finished || endedNaturally,
                         positionMs = pos.positionMs,
                         durationMs = pos.durationMs,
                         isPlaying = ts == "PLAYING",
