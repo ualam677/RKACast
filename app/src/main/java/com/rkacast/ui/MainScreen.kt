@@ -37,6 +37,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.platform.LocalConfiguration
 import android.content.res.Configuration
 import androidx.compose.ui.text.style.TextOverflow
@@ -84,11 +85,15 @@ fun MainScreen(app: AppState, browser: BrowserController) {
             snackbarHost = { SnackbarHost(app.snackbar) },
         ) { padding ->
             Row(Modifier.fillMaxSize().padding(padding)) {
-                NavigationRail(header = { castButton() }) {
+                NavigationRail(
+                    header = { castButton() },
+                    modifier = Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState()),
+                ) {
                     tabs.forEach { (tab, icon, label) ->
                         NavigationRailItem(
                             selected = app.tab == tab, onClick = { app.tab = tab },
-                            icon = { Icon(icon, null) }, label = { Text(label) },
+                            icon = { Icon(icon, label) }, label = { Text(label) },
+                            alwaysShowLabel = false,
                         )
                     }
                 }
