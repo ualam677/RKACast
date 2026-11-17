@@ -13,16 +13,31 @@ android {
         applicationId = "com.rkacast"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0"
+        // CI run number identifies every build in logs and crash reports.
+        val run = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 1
+        versionCode = run
+        versionName = "0.2.$run"
+    }
+
+    // One committed key so every CI build can be installed over the previous one.
+    // This is a personal sideload key, not a Play Store key.
+    signingConfigs {
+        create("shared") {
+            storeFile = file("rkacast.jks")
+            storePassword = "rkacast"
+            keyAlias = "rkacast"
+            keyPassword = "rkacast"
+        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            // Signed with the debug key so CI release builds are installable; replace with a real key before publishing.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("shared")
+        }
+        debug {
+            signingConfig = signingConfigs.getByName("shared")
         }
     }
 
@@ -35,6 +50,16 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
+    }
+    testOptions {
+        unitTests.all {
+            it.testLogging {
+                events("failed")
+                exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+                showStandardStreams = false
+            }
+        }
     }
     packaging {
         resources.excludes += setOf("META-INF/{AL2.0,LGPL2.1}", "META-INF/DEPENDENCIES")
@@ -81,4 +106,8 @@ dependencies {
     implementation("org.libtorrent4j:libtorrent4j-android-arm64:$lt")
     implementation("org.libtorrent4j:libtorrent4j-android-arm:$lt")
     implementation("org.libtorrent4j:libtorrent4j-android-x86_64:$lt")
+
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
 }

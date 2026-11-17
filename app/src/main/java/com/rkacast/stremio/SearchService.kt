@@ -121,11 +121,11 @@ object SearchService {
         }
     }
 
-    private fun normalize(s: String) = Normalizer.normalize(s, Normalizer.Form.NFD)
+    internal fun normalize(s: String) = Normalizer.normalize(s, Normalizer.Form.NFD)
         .replace(Regex("\\p{M}"), "").lowercase(Locale.US).replace(Regex("[^a-z0-9 ]"), " ")
         .replace(Regex("\\s+"), " ").trim()
 
-    private fun score(query: String, m: MetaPreview): Double {
+    internal fun score(query: String, m: MetaPreview): Double {
         val q = normalize(query)
         val n = normalize(m.name)
         var s = when {

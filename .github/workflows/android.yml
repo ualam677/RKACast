@@ -2,8 +2,11 @@ name: Android build
 
 on:
   push:
-  pull_request:
+    branches: [ccr-680b12f6-ib3jwo]
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -15,9 +18,24 @@ jobs:
           distribution: temurin
           java-version: "17"
       - uses: gradle/actions/setup-gradle@v4
-      - name: Build debug APK
+      - name: Unit tests
+        run: ./gradlew --no-daemon testDebugUnitTest
+      - name: Build APK
         run: ./gradlew --no-daemon assembleDebug
+      - name: Rename APK
+        run: cp app/build/outputs/apk/debug/app-debug.apk RKACast.apk
       - uses: actions/upload-artifact@v4
         with:
-          name: RKACast-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          name: RKACast-apk
+          path: RKACast.apk
+      - name: Publish release (stable link: releases/latest/download/RKACast.apk)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: RKACast build ${{ github.run_number }}
+          target_commitish: ${{ github.sha }}
+          make_latest: true
+          body: |
+            Build ${{ github.run_number }} from ${{ github.sha }}.
+            Direct download: https://github.com/${{ github.repository }}/releases/latest/download/RKACast.apk
+          files: RKACast.apk

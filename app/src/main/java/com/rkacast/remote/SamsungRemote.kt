@@ -125,10 +125,7 @@ object SamsungRemote {
     }
 
     private fun open(tv: SamsungTv, secure: Boolean) {
-        val name = Base64.encodeToString(APP_NAME.toByteArray(), Base64.NO_WRAP)
-        val tok = token(tv.ip)?.let { "&token=" + URLEncoder.encode(it, "UTF-8") } ?: ""
-        val url = if (secure) "wss://${tv.ip}:8002/api/v2/channels/samsung.remote.control?name=$name$tok"
-        else "ws://${tv.ip}:8001/api/v2/channels/samsung.remote.control?name=$name"
+        val url = SamsungPayloads.connectUrl(tv.ip, APP_NAME, token(tv.ip), secure)
         socket = client.newWebSocket(Request.Builder().url(url).build(), Listener(tv, secure))
     }
 
@@ -195,9 +192,8 @@ object SamsungRemote {
         }
     }
 
-    private fun send(method: String, params: JsonObject) {
-        val s = socket ?: return
-        s.send(buildJsonObject { put("method", method); put("params", params) }.toString())
+    private fun send(payload: JsonObject) {
+        socket?.send(payload.toString())
     }
 
     // ------------------------------------------------------------------ keys
@@ -206,9 +202,7 @@ object SamsungRemote {
     fun press(code: String) = sendKeyCmd("Press", code)
     fun release(code: String) = sendKeyCmd("Release", code)
 
-    private fun sendKeyCmd(cmd: String, code: String) = send("ms.remote.control", buildJsonObject {
-        put("Cmd", cmd); put("DataOfCmd", code); put("Option", "false"); put("TypeOfRemote", "SendRemoteKey")
-    })
+    private fun sendKeyCmd(cmd: String, code: String) = send(SamsungPayloads.key(cmd, code))
 
     // ------------------------------------------------------------------ mouse / touchpad
 
@@ -226,32 +220,25 @@ object SamsungRemote {
                     r
                 }
                 if (dx != 0 || dy != 0) {
-                    send("ms.remote.control", buildJsonObject {
-                        put("Cmd", "Move")
-                        putJsonObject("Position") { put("x", dx); put("y", dy); put("Time", "0") }
-                        put("TypeOfRemote", "ProcessMouseDevice")
-                    })
+                    send(SamsungPayloads.mouseMove(dx, dy))
                 }
                 delay(33)
             }
         }
     }
 
-    fun leftClick() = send("ms.remote.control", buildJsonObject { put("Cmd", "LeftClick"); put("TypeOfRemote", "ProcessMouseDevice") })
-    fun rightClick() = send("ms.remote.control", buildJsonObject { put("Cmd", "RightClick"); put("TypeOfRemote", "ProcessMouseDevice") })
+    fun leftClick() = send(SamsungPayloads.mouseClick(right = false))
+    fun rightClick() = send(SamsungPayloads.mouseClick(right = true))
 
     // ------------------------------------------------------------------ keyboard
 
     /** Replaces the content of the focused text box on the TV with [text]. */
     fun sendText(text: String) {
-        val b64 = Base64.encodeToString(text.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
-        send("ms.remote.control", buildJsonObject {
-            put("Cmd", b64); put("DataOfCmd", "base64"); put("TypeOfRemote", "SendInputString")
-        })
+        send(SamsungPayloads.inputString(text))
     }
 
     /** Closes the TV keyboard, submitting the text (like pressing Done/Go). */
-    fun submitText() = send("ms.remote.control", buildJsonObject { put("TypeOfRemote", "SendInputEnd") })
+    fun submitText() = send(SamsungPayloads.inputEnd())
 
     // ------------------------------------------------------------------ apps
 
@@ -269,15 +256,7 @@ object SamsungRemote {
     )
 
     fun launchApp(appId: String, deepLink: String? = null) {
-        send("ms.channel.emit", buildJsonObject {
-            put("event", "ed.apps.launch")
-            put("to", "host")
-            putJsonObject("data") {
-                put("appId", appId)
-                put("action_type", if (appId.contains('.')) "NATIVE_LAUNCH" else "DEEP_LINK")
-                if (deepLink != null) put("metaTag", deepLink)
-            }
-        })
+        send(SamsungPayloads.launchApp(appId, nativeLaunch = appId.contains('.'), metaTag = deepLink))
         val ip = _tv.value?.ip ?: return
         if (deepLink == null) {
             scope.launch {
@@ -300,10 +279,7 @@ object SamsungRemote {
         val mac = tv.mac ?: run { _message.value = "This TV didn't report its MAC address, so it can't be woken remotely."; return }
         scope.launch {
             runCatching {
-                val macBytes = mac.split(':', '-').map { it.toInt(16).toByte() }.toByteArray()
-                val packet = ByteArray(6 + 16 * 6)
-                for (i in 0 until 6) packet[i] = 0xFF.toByte()
-                for (i in 0 until 16) System.arraycopy(macBytes, 0, packet, 6 + i * 6, 6)
+                val packet = SamsungPayloads.magicPacket(mac)
                 DatagramSocket().use { s ->
                     s.broadcast = true
                     repeat(3) {

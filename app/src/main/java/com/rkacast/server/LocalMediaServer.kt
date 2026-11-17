@@ -216,29 +216,15 @@ object LocalMediaServer {
                 dlnaHeaders(r)
                 return r
             }
-            val range = session.headers["range"]
-            var start = 0L
-            var end = totalLength - 1
-            var partial = false
-            if (range != null && range.startsWith("bytes=")) {
-                val spec = range.removePrefix("bytes=").substringBefore(',')
-                val s = spec.substringBefore('-')
-                val e = spec.substringAfter('-', "")
-                if (s.isEmpty()) {
-                    // suffix range: last N bytes
-                    val n = e.toLongOrNull() ?: 0
-                    start = (totalLength - n).coerceAtLeast(0)
-                } else {
-                    start = s.toLongOrNull() ?: 0
-                    if (e.isNotEmpty()) end = e.toLongOrNull()?.coerceAtMost(totalLength - 1) ?: end
-                }
-                partial = true
+            val r = RangeParser.parse(session.headers["range"], totalLength)
+            if (r == null) {
+                val resp = newFixedLengthResponse(Response.Status.RANGE_NOT_SATISFIABLE, MIME_PLAINTEXT, "")
+                resp.addHeader("Content-Range", "bytes */$totalLength")
+                return resp
             }
-            if (start >= totalLength || start > end) {
-                val r = newFixedLengthResponse(Response.Status.RANGE_NOT_SATISFIABLE, MIME_PLAINTEXT, "")
-                r.addHeader("Content-Range", "bytes */$totalLength")
-                return r
-            }
+            val start = r.start
+            val end = r.end
+            val partial = r.partial
             val len = end - start + 1
             val stream = if (session.method == Method.HEAD) "".byteInputStream() else open(start)
             val r = newFixedLengthResponse(
