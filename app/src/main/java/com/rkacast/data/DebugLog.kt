@@ -47,10 +47,13 @@ object DebugLog {
             lines.addLast(line)
             while (lines.size > MAX) lines.removeFirst()
         }
-        when (level) {
-            "E" -> Log.e("RKA/$tag", clean, t)
-            "W" -> Log.w("RKA/$tag", clean, t)
-            else -> Log.i("RKA/$tag", clean)
+        // Logging must never throw (e.g. android.util.Log is unavailable in JVM unit tests).
+        runCatching {
+            when (level) {
+                "E" -> Log.e("RKA/$tag", clean, t)
+                "W" -> Log.w("RKA/$tag", clean, t)
+                else -> Log.i("RKA/$tag", clean)
+            }
         }
     }
 

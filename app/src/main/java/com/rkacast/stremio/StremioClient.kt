@@ -60,14 +60,15 @@ object StremioClient {
             }
 
             override fun onResponse(call: Call, response: okhttp3.Response) {
-                response.use { r ->
-                    com.rkacast.data.DebugLog.i("Stremio", "GET $label -> ${r.code} in ${System.currentTimeMillis() - started}ms")
-                    val result = runCatching {
+                // Always resume the continuation, whatever happens in here.
+                val result = runCatching {
+                    response.use { r ->
+                        com.rkacast.data.DebugLog.i("Stremio", "GET $label -> ${r.code} in ${System.currentTimeMillis() - started}ms")
                         if (!r.isSuccessful) throw IOException("HTTP ${r.code} for $url")
                         r.body?.string() ?: throw IOException("Empty response")
                     }
-                    if (cont.isActive) result.fold({ cont.resume(it) }, { cont.resumeWithException(it) })
                 }
+                if (cont.isActive) result.fold({ cont.resume(it) }, { cont.resumeWithException(it) })
             }
         })
     }
