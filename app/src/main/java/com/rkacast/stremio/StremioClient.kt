@@ -123,7 +123,11 @@ object StremioClient {
 
     // ---------------------------------------------------------------- Stremio account
 
-    private suspend fun api(method: String, body: JsonObject): JsonObject = withContext(Dispatchers.IO) {
+    private suspend fun api(method: String, body: JsonObject): JsonObject =
+        apiRaw(method, body) as? JsonObject ?: throw IOException("Unexpected response from Stremio")
+
+    /** Like [api] but returns the raw "result" element (some methods return arrays). */
+    private suspend fun apiRaw(method: String, body: JsonObject): kotlinx.serialization.json.JsonElement = withContext(Dispatchers.IO) {
         val req = Request.Builder().url("$API/$method")
             .post(body.toString().toRequestBody("application/json".toMediaType()))
             .build()
@@ -133,8 +137,21 @@ object StremioClient {
                 val msg = (err as? JsonObject)?.get("message")?.jsonPrimitive?.contentOrNull ?: err.toString()
                 throw IOException(msg)
             }
-            obj["result"]?.jsonObject ?: throw IOException("Unexpected response from Stremio")
+            obj["result"] ?: throw IOException("Unexpected response from Stremio")
         }
+    }
+
+    /** Read-only: items in the user's Stremio library (most recently watched first). */
+    suspend fun library(authKey: String): List<LibraryItem> {
+        val result = apiRaw("datastoreGet", buildJsonObject {
+            put("authKey", authKey); put("collection", "libraryItem"); put("all", true)
+            put("ids", kotlinx.serialization.json.JsonArray(emptyList()))
+        })
+        com.rkacast.data.DebugLog.i("Stremio", "Library raw: ${result.toString().take(600)}")
+        val arr = result as? kotlinx.serialization.json.JsonArray ?: return emptyList()
+        return arr.mapNotNull { runCatching { json.decodeFromJsonElement(LibraryItem.serializer(), it) }.getOrNull() }
+            .filter { !it.removed && !it.temp && (it.type == "movie" || it.type == "series") }
+            .sortedByDescending { it.state?.lastWatched ?: it.mtime ?: "" }
     }
 
     /** Logs in to a Stremio account and returns the authKey. */

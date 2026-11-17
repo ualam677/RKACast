@@ -150,3 +150,27 @@ data class InstalledAddon(val transportUrl: String, val manifest: Manifest) {
 
 /** A stream together with the addon it came from, for display. */
 data class AddonStream(val addonName: String, val stream: Stream)
+
+@Serializable
+data class LibraryState(
+    val timeOffset: Double = 0.0,
+    val duration: Double = 0.0,
+    @kotlinx.serialization.SerialName("video_id") val videoId: String? = null,
+    val lastWatched: String? = null,
+    val timesWatched: Int = 0,
+)
+
+@Serializable
+data class LibraryItem(
+    @kotlinx.serialization.SerialName("_id") val id: String,
+    val name: String = "",
+    val type: String = "",
+    val poster: String? = null,
+    val removed: Boolean = false,
+    val temp: Boolean = false,
+    @kotlinx.serialization.SerialName("_mtime") val mtime: String? = null,
+    val state: LibraryState? = null,
+) {
+    val progress: Float get() = state?.let { if (it.duration > 0) (it.timeOffset / it.duration).toFloat().coerceIn(0f, 1f) else 0f } ?: 0f
+    fun toPreview() = MetaPreview(id = id, type = type, name = name, poster = poster)
+}

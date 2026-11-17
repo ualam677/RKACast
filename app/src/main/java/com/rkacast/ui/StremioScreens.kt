@@ -194,8 +194,33 @@ private fun DiscoverScreen(addons: List<InstalledAddon>, push: (StremioRoute) ->
             }
         }
         item { ContinueWatchingRow(push) }
+        item { LibraryRow(push) }
         items(rows, key = { "${it.addon.manifest.id}/${it.catalog.type}/${it.catalog.id}" }) { row ->
             CatalogRowView(row, push)
+        }
+    }
+}
+
+@Composable
+private fun LibraryRow(push: (StremioRoute) -> Unit) {
+    val authKey by Settings.stremioAuthKey.collectAsState()
+    val key = authKey ?: return
+    var items by remember(key) { mutableStateOf<List<com.rkacast.stremio.LibraryItem>?>(null) }
+    LaunchedEffect(key) { items = runCatching { StremioClient.library(key) }.getOrDefault(emptyList()) }
+    val list = items ?: return
+    if (list.isEmpty()) return
+    Column(Modifier.padding(vertical = 6.dp)) {
+        Text("Your Stremio library", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 16.dp))
+        Spacer(Modifier.height(6.dp))
+        LazyRow(contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp)) {
+            items(list, key = { it.id }) { item ->
+                Column(Modifier.width(112.dp).padding(horizontal = 4.dp)) {
+                    Poster(item.toPreview(), Modifier.fillMaxWidth()) { push(StremioRoute.Detail(item.type, item.id, item.toPreview())) }
+                    if (item.progress > 0f) {
+                        androidx.compose.material3.LinearProgressIndicator(progress = { item.progress }, modifier = Modifier.fillMaxWidth().padding(top = 2.dp))
+                    }
+                }
+            }
         }
     }
 }

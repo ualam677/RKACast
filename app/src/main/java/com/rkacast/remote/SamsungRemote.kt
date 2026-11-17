@@ -160,6 +160,7 @@ object SamsungRemote {
                     _status.value = Status.CONNECTED
                     _message.value = null
                     startMouseLoop()
+                    send(SamsungPayloads.installedApps())
                 }
                 "ms.channel.unauthorized" -> {
                     _status.value = Status.ERROR
@@ -168,6 +169,11 @@ object SamsungRemote {
                 "ms.channel.timeOut" -> {
                     _status.value = Status.ERROR
                     _message.value = "No answer on the TV. Try again and press Allow."
+                }
+                "ed.installedApp.get" -> {
+                    val list = SamsungPayloads.parseInstalledApps(obj)
+                    DebugLog.i("Samsung", "TV reported ${list.size} apps")
+                    if (list.isNotEmpty()) _installedApps.value = list.sortedBy { it.name.lowercase() }
                 }
                 "ms.remote.imeStart" -> _keyboardOpen.value = true
                 "ms.remote.imeEnd" -> _keyboardOpen.value = false
@@ -246,7 +252,11 @@ object SamsungRemote {
 
     // ------------------------------------------------------------------ apps
 
-    data class TvApp(val name: String, val id: String)
+    data class TvApp(val name: String, val id: String, val nativeLaunch: Boolean = id.contains('.'))
+
+    private val _installedApps = MutableStateFlow<List<TvApp>>(emptyList())
+    /** Apps reported by the TV itself; empty if the TV didn't answer (UI falls back to [apps]). */
+    val installedApps: StateFlow<List<TvApp>> = _installedApps
 
     /** Common app ids on Tizen; ids can vary by region/model, so launching falls back to the REST API. */
     val apps = listOf(
@@ -259,8 +269,14 @@ object SamsungRemote {
         TvApp("Internet", "org.tizen.browser"),
     )
 
-    fun launchApp(appId: String, deepLink: String? = null) {
-        send(SamsungPayloads.launchApp(appId, nativeLaunch = appId.contains('.'), metaTag = deepLink))
+    fun launchApp(appId: String, deepLink: String? = null, nativeLaunch: Boolean = appId.contains('.')) {
+        DebugLog.i("Samsung", "Launch app $appId native=$nativeLaunch deepLink=${deepLink != null}")
+        val ws = socket
+        if (ws != null) {
+            send(SamsungPayloads.launchApp(appId, nativeLaunch = nativeLaunch, metaTag = deepLink))
+            return
+        }
+        // No socket: fall back to the REST endpoint.
         val ip = _tv.value?.ip ?: return
         if (deepLink == null) {
             scope.launch {

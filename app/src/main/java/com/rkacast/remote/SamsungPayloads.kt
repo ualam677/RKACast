@@ -63,6 +63,22 @@ object SamsungPayloads {
         putJsonObject("params") { put("event", "ed.installedApp.get"); put("to", "host") }
     }
 
+    /**
+     * Parses the reply to [installedApps]: {"event":"ed.installedApp.get","data":{"data":[{"appId","name","app_type"}]}}.
+     * app_type 4 apps are launched with NATIVE_LAUNCH, others with DEEP_LINK.
+     */
+    fun parseInstalledApps(msg: JsonObject): List<SamsungRemote.TvApp> {
+        val data = msg["data"] as? JsonObject ?: return emptyList()
+        val arr = (data["data"] as? kotlinx.serialization.json.JsonArray) ?: return emptyList()
+        return arr.mapNotNull { el ->
+            val o = el as? JsonObject ?: return@mapNotNull null
+            val id = (o["appId"] as? kotlinx.serialization.json.JsonPrimitive)?.content ?: return@mapNotNull null
+            val name = (o["name"] as? kotlinx.serialization.json.JsonPrimitive)?.content ?: id
+            val type = (o["app_type"] as? kotlinx.serialization.json.JsonPrimitive)?.content?.toIntOrNull()
+            SamsungRemote.TvApp(name, id, nativeLaunch = type == 4 || id.contains('.'))
+        }
+    }
+
     /** Wake-on-LAN magic packet: 6×0xFF followed by the MAC repeated 16 times. */
     fun magicPacket(mac: String): ByteArray {
         val macBytes = mac.split(':', '-').map { it.toInt(16).toByte() }.toByteArray()

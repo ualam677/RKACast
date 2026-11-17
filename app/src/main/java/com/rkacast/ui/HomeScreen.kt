@@ -57,7 +57,7 @@ fun handleInput(app: AppState, raw: String, onPhone: Boolean = false) {
         MediaUtils.isMagnet(text) || MediaUtils.isInfoHash(text) -> {
             Settings.addHistory(text, "Torrent")
             val resolve = suspend { MediaResolver.fromTorrent(ctx, text, null, subtitleUrl = sub) }
-            if (onPhone) app.playOnPhone("Starting torrent…", resolve) else app.cast("Starting torrent…", resolve)
+            if (onPhone) app.playOnPhone("Starting torrent…", resolve) else app.cast("Starting torrent…", resolve = resolve)
         }
         text.startsWith("stremio://") || text.endsWith("manifest.json") -> {
             app.pendingStremioAddon = text

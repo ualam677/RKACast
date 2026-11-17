@@ -418,11 +418,13 @@ private fun KeyboardPanel() {
 @Composable
 private fun AppsPanel() {
     var url by rememberSaveable { mutableStateOf("") }
-    Text("Apps", style = MaterialTheme.typography.titleMedium)
+    val installed by SamsungRemote.installedApps.collectAsState()
+    val apps = installed.ifEmpty { SamsungRemote.apps }
+    Text(if (installed.isEmpty()) "Apps" else "Apps on your TV", style = MaterialTheme.typography.titleMedium)
     androidx.compose.foundation.lazy.LazyRow {
-        items(SamsungRemote.apps.size) { i ->
-            val a = SamsungRemote.apps[i]
-            OutlinedButton(onClick = { SamsungRemote.launchApp(a.id) }, modifier = Modifier.padding(end = 6.dp)) { Text(a.name) }
+        items(apps.size) { i ->
+            val a = apps[i]
+            OutlinedButton(onClick = { SamsungRemote.launchApp(a.id, nativeLaunch = a.nativeLaunch) }, modifier = Modifier.padding(end = 6.dp)) { Text(a.name) }
         }
     }
     Spacer(Modifier.height(8.dp))
