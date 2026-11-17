@@ -3,6 +3,7 @@ package com.rkacast.ui
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -24,6 +25,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
@@ -34,6 +37,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
+import android.content.res.Configuration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.rkacast.browser.BrowserController
@@ -45,44 +50,68 @@ import com.rkacast.torrent.TorrentEngine
 @Composable
 fun MainScreen(app: AppState, browser: BrowserController) {
     val selected by CastManager.selected.collectAsState()
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("RKACast") },
-                actions = {
-                    IconButton(onClick = { app.showDevicePicker = true }) {
-                        Icon(
-                            if (selected != null) Icons.Default.CastConnected else Icons.Default.Cast,
-                            contentDescription = "Cast to a device",
-                            tint = if (selected != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+    val landscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val castButton: @Composable () -> Unit = {
+        IconButton(onClick = { app.showDevicePicker = true }) {
+            Icon(
+                if (selected != null) Icons.Default.CastConnected else Icons.Default.Cast,
+                contentDescription = "Cast to a device",
+                tint = if (selected != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+            )
+        }
+    }
+    val tabs = listOf(
+        Triple(Tab.HOME, Icons.Default.Home, "Cast"),
+        Triple(Tab.BROWSER, Icons.Default.Language, "Browser"),
+        Triple(Tab.STREMIO, Icons.Default.Movie, "Stremio"),
+        Triple(Tab.REMOTE, Icons.Default.SettingsRemote, "Remote"),
+        Triple(Tab.SETTINGS, Icons.Default.Settings, "Settings"),
+    )
+    val content: @Composable () -> Unit = {
+        when (app.tab) {
+            Tab.HOME -> HomeScreen(app)
+            Tab.BROWSER -> BrowserScreen(app, browser)
+            Tab.STREMIO -> StremioTab(app)
+            Tab.REMOTE -> RemoteScreen(app)
+            Tab.SETTINGS -> SettingsScreen(app)
+        }
+    }
+
+    if (landscape) {
+        // Landscape: side rail instead of top bar + bottom tabs, so content gets the full height.
+        Scaffold(
+            bottomBar = { Column { BusyBar(app); NowPlayingBar(app) } },
+            snackbarHost = { SnackbarHost(app.snackbar) },
+        ) { padding ->
+            Row(Modifier.fillMaxSize().padding(padding)) {
+                NavigationRail(header = { castButton() }) {
+                    tabs.forEach { (tab, icon, label) ->
+                        NavigationRailItem(
+                            selected = app.tab == tab, onClick = { app.tab = tab },
+                            icon = { Icon(icon, null) }, label = { Text(label) },
                         )
                     }
-                },
-            )
-        },
-        bottomBar = {
-            Column {
-                BusyBar(app)
-                NowPlayingBar(app)
-                NavigationBar {
-                    NavigationBarItem(app.tab == Tab.HOME, { app.tab = Tab.HOME }, { Icon(Icons.Default.Home, null) }, label = { Text("Cast") })
-                    NavigationBarItem(app.tab == Tab.BROWSER, { app.tab = Tab.BROWSER }, { Icon(Icons.Default.Language, null) }, label = { Text("Browser") })
-                    NavigationBarItem(app.tab == Tab.STREMIO, { app.tab = Tab.STREMIO }, { Icon(Icons.Default.Movie, null) }, label = { Text("Stremio") })
-                    NavigationBarItem(app.tab == Tab.REMOTE, { app.tab = Tab.REMOTE }, { Icon(Icons.Default.SettingsRemote, null) }, label = { Text("Remote") })
-                    NavigationBarItem(app.tab == Tab.SETTINGS, { app.tab = Tab.SETTINGS }, { Icon(Icons.Default.Settings, null) }, label = { Text("Settings") })
                 }
+                Column(Modifier.weight(1f).fillMaxHeight()) { content() }
             }
-        },
-        snackbarHost = { SnackbarHost(app.snackbar) },
-    ) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding)) {
-            when (app.tab) {
-                Tab.HOME -> HomeScreen(app)
-                Tab.BROWSER -> BrowserScreen(app, browser)
-                Tab.STREMIO -> StremioTab(app)
-                Tab.REMOTE -> RemoteScreen(app)
-                Tab.SETTINGS -> SettingsScreen(app)
-            }
+        }
+    } else {
+        Scaffold(
+            topBar = { TopAppBar(title = { Text("RKACast") }, actions = { castButton() }) },
+            bottomBar = {
+                Column {
+                    BusyBar(app)
+                    NowPlayingBar(app)
+                    NavigationBar {
+                        tabs.forEach { (tab, icon, label) ->
+                            NavigationBarItem(app.tab == tab, { app.tab = tab }, { Icon(icon, null) }, label = { Text(label) })
+                        }
+                    }
+                }
+            },
+            snackbarHost = { SnackbarHost(app.snackbar) },
+        ) { padding ->
+            Column(Modifier.fillMaxSize().padding(padding)) { content() }
         }
     }
     if (app.showDevicePicker) DevicePickerSheet(app)
