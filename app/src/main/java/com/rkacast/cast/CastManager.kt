@@ -218,6 +218,8 @@ object CastManager {
             }
             DeviceKind.DLNA -> {
                 val c = dlna ?: return
+                // Stop polling the previous video so its near-end position can't be read as "finished" for this one.
+                dlnaPoll?.cancel()
                 scope.launch {
                     runCatching {
                         c.load(media.url, media.title, media.mimeType, media.subtitleUrl)

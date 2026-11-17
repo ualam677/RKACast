@@ -52,6 +52,7 @@ object PlaybackTracker {
     private var lastPos = 0L
     private var lastDur = 0L
     private var handledFinishFor: String? = null
+    private var startedAt = 0L
     private var countdownJob: Job? = null
 
     private val _upNext = MutableStateFlow<UpNext?>(null)
@@ -71,7 +72,8 @@ object PlaybackTracker {
                     lastSave = now
                     save(ctx)
                 }
-                if (st.finished && handledFinishFor != media.url) {
+                // Ignore "finished" right after starting: TVs can report a stale end state while switching videos.
+                if (st.finished && handledFinishFor != media.url && now - startedAt > 20_000) {
                     handledFinishFor = media.url
                     DebugLog.i("Playback", "Finished '${ctx.title}'")
                     save(ctx, finished = true)
@@ -90,6 +92,7 @@ object PlaybackTracker {
         context?.let { if (lastPos > 0) save(it) }
         context = ctx
         contextMediaUrl = mediaUrl
+        startedAt = System.currentTimeMillis()
         lastPos = 0
         lastDur = 0
         lastSave = System.currentTimeMillis()

@@ -13,9 +13,14 @@ Android app to cast videos to your TV, similar to Web Video Caster, with Stremio
 - **Play on phone**: built-in ExoPlayer.
 
 ## Install (no PC needed)
-1. Open the repo on GitHub → **Actions** → latest **Android build** run.
-2. Download the **RKACast-debug-apk** artifact (a zip), extract it, and open the `.apk`.
-3. Allow "install unknown apps" for your browser or file manager when prompted.
+Open this link on your phone and install the APK (allow "install unknown apps" when asked):
+
+**https://github.com/ualam677/RKACast/releases/latest/download/RKACast.apk**
+
+Every build is signed with the same key, so new versions install over the old one and keep your settings.
+
+## Reporting bugs
+Settings → Open debug log → Copy, then paste it into the chat. If the app crashed, it offers a crash report the next time it opens.
 
 ## Build locally
 ```
