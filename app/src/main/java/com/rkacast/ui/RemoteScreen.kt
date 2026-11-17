@@ -173,7 +173,7 @@ private fun ConnectCard(app: AppState, status: SamsungRemote.Status, current: Sa
     Row(verticalAlignment = Alignment.CenterVertically) {
         OutlinedTextField(
             manualIp, { manualIp = it.trim() }, singleLine = true, modifier = Modifier.weight(1f),
-            placeholder = { Text("TV IP, e.g. 192.168.1.50") },
+            placeholder = { Text("TV IP address", maxLines = 1) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
         )
         Spacer(Modifier.width(8.dp))

@@ -124,10 +124,10 @@ fun HomeScreen(app: AppState) {
             Spacer(Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Button(onClick = { handleInput(app, input) }, enabled = input.isNotBlank(), modifier = Modifier.weight(1f)) {
-                    Icon(Icons.Default.Cast, null); Spacer(Modifier.width(8.dp)); Text("Cast")
+                    Icon(Icons.Default.Cast, null); Spacer(Modifier.width(8.dp)); Text("Cast", maxLines = 1)
                 }
                 OutlinedButton(onClick = { handleInput(app, input, onPhone = true) }, enabled = input.isNotBlank(), modifier = Modifier.weight(1f)) {
-                    Icon(Icons.Default.PhoneAndroid, null); Spacer(Modifier.width(8.dp)); Text("Play here")
+                    Icon(Icons.Default.PhoneAndroid, null); Spacer(Modifier.width(8.dp)); Text("Play here", maxLines = 1, softWrap = false)
                 }
             }
             Spacer(Modifier.height(4.dp))
